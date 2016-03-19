@@ -10,8 +10,10 @@ const enemyGeometry = new THREE.BoxGeometry(10, 10, 10);
 const enemyMaterialHithox = new THREE.MeshBasicMaterial({
   color: 0x333333,
   wireframe: true,
-  wireframeLinewidth: 0.01
+  wireframeLinewidth: 0.01,
+  transparent: true,
 });
+enemyMaterialHithox.opacity = 0;
 
 const AddEnemy = Level
   .flatMapLatest(function(currentLevel){

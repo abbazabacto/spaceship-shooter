@@ -15329,8 +15329,10 @@ var enemyGeometry = new _three2.default.BoxGeometry(10, 10, 10);
 var enemyMaterialHithox = new _three2.default.MeshBasicMaterial({
   color: 0x333333,
   wireframe: true,
-  wireframeLinewidth: 0.01
+  wireframeLinewidth: 0.01,
+  transparent: true
 });
+enemyMaterialHithox.opacity = 0;
 
 var AddEnemy = _score.Level.flatMapLatest(function (currentLevel) {
   return _rx2.default.Observable.interval(5000 - currentLevel * 100).startWith(-1).map(function (index) {
