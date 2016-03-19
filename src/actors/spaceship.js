@@ -8,15 +8,15 @@ const spaceShipMaterial = new THREE.MeshBasicMaterial({
 
 const loader = new THREE.JSONLoader();
 
-loader.load('res/models/spaceship.json', function (geometry) {
-  SpaceshipGeometry.onNext(geometry);
+loader.load('res/models/spaceship.json', function (geometry, materials) {
+  SpaceshipGeometry.onNext({geometry, materials});
 });
 
 export const SpaceshipMesh = SpaceshipGeometry
-  .map(function(spaceShipGeometry){
-    const spaceShipMesh = new THREE.Mesh(spaceShipGeometry, spaceShipMaterial);
-    spaceShipMesh.position.y -= 1;
-    spaceShipMesh.scale.set(2, 2, 2);
+  .map(function({geometry, materials}){
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    mesh.position.y -= 1;
+    mesh.scale.set(2, 2, 2);
     
-    return spaceShipMesh;
+    return mesh;
   });

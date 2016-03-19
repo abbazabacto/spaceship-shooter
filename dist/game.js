@@ -15595,16 +15595,19 @@ var spaceShipMaterial = new _three2.default.MeshBasicMaterial({
 
 var loader = new _three2.default.JSONLoader();
 
-loader.load('res/models/spaceship.json', function (geometry) {
-  SpaceshipGeometry.onNext(geometry);
+loader.load('res/models/spaceship.json', function (geometry, materials) {
+  SpaceshipGeometry.onNext({ geometry: geometry, materials: materials });
 });
 
-var SpaceshipMesh = exports.SpaceshipMesh = SpaceshipGeometry.map(function (spaceShipGeometry) {
-  var spaceShipMesh = new _three2.default.Mesh(spaceShipGeometry, spaceShipMaterial);
-  spaceShipMesh.position.y -= 1;
-  spaceShipMesh.scale.set(2, 2, 2);
+var SpaceshipMesh = exports.SpaceshipMesh = SpaceshipGeometry.map(function (_ref) {
+  var geometry = _ref.geometry;
+  var materials = _ref.materials;
 
-  return spaceShipMesh;
+  var mesh = new _three2.default.Mesh(geometry, new _three2.default.MeshFaceMaterial(materials));
+  mesh.position.y -= 1;
+  mesh.scale.set(2, 2, 2);
+
+  return mesh;
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
@@ -15686,6 +15689,9 @@ _actors.SpaceshipMesh.subscribe(function (spaceShipMesh) {
 var Preload = _rx2.default.Observable.combineLatest(_actors.SpaceshipMesh, _rx2.default.DOM.ready(), function (spaceshipMesh) {
   return { spaceshipMesh: spaceshipMesh };
 });
+
+var light = new _three2.default.AmbientLight(0xffffff); // soft white light
+_tools.scene.add(light);
 
 var Game = _rx2.default.Observable.combineLatest(_tools.AnimationFrame, _utils.AspectRatio, _tools.EffectRenderer, _tools.Controls, _actors.Stars, _actors.Shots, _actors.Enemies, function (animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies) {
   return {

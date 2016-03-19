@@ -23,9 +23,12 @@ const Preload = Rx.Observable
     spaceshipMesh => ({ spaceshipMesh })
   );
 
+var light = new THREE.AmbientLight( 0xffffff ); // soft white light
+scene.add( light );
+
 const Game = Rx.Observable
   .combineLatest(
-    AnimationFrame, AspectRatio, EffectRenderer, Controls, Stars, Shots, Enemies, 
+   AnimationFrame, AspectRatio, EffectRenderer, Controls, Stars, Shots, Enemies, 
     function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies){
       return { 
         animationFrame,
