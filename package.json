@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cordova:android": "gulp build-cordova && (cd cordova && cordova run android)",
+    "cordova:browser": "gulp build-cordova && (cd cordova && cordova run browser) && npm run chrome-canary",
+    "cordova:browser:watch": "gulp watch-cordova",
+    "cordova:android:platform": "./bin/cordova.platform.android.sh",
+    "cordova:browser:platform": "./bin/cordova.platform.browser.sh",
+    "chrome-canary": "/usr/bin/open -n \"/Applications/Google Chrome Canary.app\" --args --disable-web-security --auto-open-devtools-for-tab --user-data-dir=/tmp/canary"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +19,9 @@
     "browser-sync": "^2.11.1",
     "browserify": "^13.0.0",
     "browserify-shim": "^3.8.12",
+    "cordova": "6.2.0",
     "gulp": "^3.9.0",
+    "gulp-replace": "0.5.4",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.1",
     "gulp-util": "^3.0.7",
@@ -26,7 +33,9 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "browserify": {
-    "transform": [ "browserify-shim" ]
+    "transform": [
+      "browserify-shim"
+    ]
   },
   "browser": {
     "three": "./node_modules/three/three,js"

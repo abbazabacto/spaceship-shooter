@@ -2,3 +2,5 @@ node_modules
 *.psd
 *.blend
 dist
+cordova/**
+!cordova/config.xml

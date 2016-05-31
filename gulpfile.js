@@ -6,6 +6,7 @@ var buffer = require('vinyl-buffer');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 var gutil = require('gulp-util');
+var replace = require('gulp-replace');
 
 gulp.task('babelify', function () {
   return browserify({ entries: './src/game.js', debug: true })
@@ -41,6 +42,15 @@ gulp.task('serve', ['watch'], function(){
       baseDir: root
     }
   });
+});
+
+gulp.task('build-cordova', ['babelify'], function(){
+  gulp.src(['./index.html'])
+    .pipe(replace('node_modules/three', 'lib'))
+    .pipe(gulp.dest('./cordova/www'));
+  gulp.src(['./node_modules/three/three.js']).pipe(gulp.dest('./cordova/www/lib'));
+  gulp.src(['./res/**/*']).pipe(gulp.dest('./cordova/www/res'));
+  gulp.src(['./dist/**/*']).pipe(gulp.dest('./cordova/www/dist'));
 });
 
 gulp.task('default', ['serve']);
