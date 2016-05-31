@@ -2,8 +2,8 @@ import THREE from 'three';
 import Rx from 'rx';
 
 import { camera, scene } from '../tools';
-import { Level } from './score';
-import { SpaceshipMesh } from './spaceship';
+import { level$ } from './score';
+import { spaceshipMesh$ } from './spaceship';
 import { randomFromRange } from '../utils';
 
 const enemyGeometry = new THREE.BoxGeometry(10, 10, 10);
@@ -15,22 +15,22 @@ const enemyMaterialHithox = new THREE.MeshBasicMaterial({
 });
 enemyMaterialHithox.opacity = 0;
 
-const AddEnemy = Level
+const addEnemy$ = level$
   .flatMapLatest(function(currentLevel){
     return Rx.Observable.interval(5000 - (currentLevel * 100))
       .startWith(-1)
       .map((index) => currentLevel);
   });
 
-const RemoveEnemy = new Rx.Subject();
+const removeEnemy$ = new Rx.Subject();
 
-export const Enemies = Rx.Observable
+export const enemies$ = Rx.Observable
   .merge(
-    AddEnemy.map(function (index) {
+    addEnemy$.map(function (index) {
       const enemy = new THREE.Mesh(enemyGeometry, enemyMaterialHithox);
       //const enemy = new THREE.Object3D();
       
-      SpaceshipMesh.subscribe(function (spaceshipMesh) {
+      spaceshipMesh$.subscribe(function (spaceshipMesh) {
         enemy.add(spaceshipMesh.clone());
       });
 
@@ -45,7 +45,7 @@ export const Enemies = Rx.Observable
 
       return enemies => enemies.concat(enemy);
     }),
-    RemoveEnemy.map(function (removeEnemy) {
+    removeEnemy$.map(function (removeEnemy) {
       scene.remove(removeEnemy);
 
       return enemies => enemies.filter(enemy => enemy !== removeEnemy);
@@ -56,5 +56,5 @@ export const Enemies = Rx.Observable
 
 //export const removeEnemy = RemoveEnemy.onNext;
 export function removeEnemy(enemy){
-  RemoveEnemy.onNext(enemy);
+  removeEnemy$.onNext(enemy);
 }

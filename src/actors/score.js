@@ -1,16 +1,16 @@
 import Rx from 'rx';
 
-import { camera, AnimationFrame, RendererStereoEffect } from '../tools';
-import { createTextMesh, AspectRatio, getRad } from '../utils';
+import { camera, animationFrame$, rendererStereoEffect$ } from '../tools';
+import { createTextMesh, aspectRatio$, getRad } from '../utils';
 
-const AddScore = new Rx.Subject();
+const addScore$ = new Rx.Subject();
 
-const RemoveScore = new Rx.Subject();
+const removeScore$ = new Rx.Subject();
 
-export const Score = Rx.Observable
+export const score$ = Rx.Observable
   .merge(
-    AddScore,
-    RemoveScore.map(points => points * -1)
+    addScore$,
+    removeScore$.map(points => points * -1)
   )
   .scan((score, points) => score + points, 0)
   .startWith(0)
@@ -22,14 +22,14 @@ scoreHolder.position.y = 80;
 scoreHolder.position.z = -100;
 camera.add(scoreHolder);
 
-const ScoreMesh = Score
+const scoreMesh$ = score$
   .map(function(currentScore){
     scoreHolder.remove(scoreHolder.children[0]);
     scoreHolder.add(createTextMesh(currentScore, {}, 'right'));
     return scoreHolder;
   });
 
-export const Level = Score
+export const level$ = score$
   .map((currentScore) => Math.ceil((currentScore + 1) / 1000))
   .startWith(1)
   .distinctUntilChanged()
@@ -39,7 +39,7 @@ const levelHolder = new THREE.Object3D();
 camera.add(levelHolder);
 levelHolder.position.z = -100;
 
-const LevelMesh = Level
+const levelMesh$ = level$
   .map(function(currenLevel){
     levelHolder.position.y = 120;
     levelHolder.remove(levelHolder.children[0]);
@@ -50,7 +50,7 @@ const LevelMesh = Level
 
 Rx.Observable
   .combineLatest(
-    AnimationFrame, ScoreMesh, LevelMesh,
+    animationFrame$, scoreMesh$, levelMesh$,
     function(animationFrame, scoreMesh, levelMesh){
       return { 
         animationFrame,
@@ -74,16 +74,16 @@ const maxScore = 100;
 //export const addScore = AddScore.onNext;
 export function addScore(ships, shotIndex){
   const pointDeduction = shotIndex * minScore;
-  AddScore.onNext(ships * (pointDeduction > maxScore - minScore ? minScore : maxScore - pointDeduction));
+  addScore$.onNext(ships * (pointDeduction > maxScore - minScore ? minScore : maxScore - pointDeduction));
 }
 
 //export const removeScore = AddScore.onNext;
 export function removeScore(points){
-  RemoveScore.onNext(points);
+  removeScore$.onNext(points);
 }
 
 Rx.Observable
-  .combineLatest(AspectRatio, RendererStereoEffect, 
+  .combineLatest(aspectRatio$, rendererStereoEffect$, 
     function (aspectRatio, rendererStereoEffect) {
       return { aspectRatio, rendererStereoEffect };
     }

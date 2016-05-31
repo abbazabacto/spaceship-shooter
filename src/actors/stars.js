@@ -9,7 +9,7 @@ const starMaterial = new THREE.MeshBasicMaterial({
   color: 0xf1f1f1
 });
 
-export const Stars = Rx.Observable.range(0, 1000)
+export const stars$ = Rx.Observable.range(0, 1000)
   .map(function () {
     var star = new THREE.Mesh(starGeometry, starMaterial);
     star.position.x = randomFromRange(-500, 500);

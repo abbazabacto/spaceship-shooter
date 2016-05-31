@@ -21,7 +21,7 @@ function createGetAspectRatio(container){
 
 export const getAspectRatio = createGetAspectRatio(renderer.domElement);
 
-export const AspectRatio = DomReady.flatMap(function(){
+export const aspectRatio$ = DomReady.flatMap(function(){
   return Rx.Observable
     .fromEvent(window, 'resize')
     .map(getAspectRatio)

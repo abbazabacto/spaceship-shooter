@@ -7,9 +7,9 @@ renderer.setPixelRatio(window.devicePixelRatio || 1);
 
 const effect = new THREE.StereoEffect(renderer);
 
-export const RendererStereoEffect = new Rx.BehaviorSubject();
+export const rendererStereoEffect$ = new Rx.BehaviorSubject();
 
-export const EffectRenderer = RendererStereoEffect
+export const effectRenderer$ = rendererStereoEffect$
   .map(function(renderStereoEffect){
     if(renderStereoEffect){
       var seperator = document.createElement('div');
@@ -30,7 +30,7 @@ export const EffectRenderer = RendererStereoEffect
   });
 
 export function setRenderEffect(enable){
-  RendererStereoEffect.onNext(enable);
+  rendererStereoEffect$.onNext(enable);
 }
 
 //setRenderEffect(true);

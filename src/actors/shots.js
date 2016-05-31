@@ -2,37 +2,37 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { renderer, camera, scene, Controls } from '../tools';
+import { renderer, camera, scene, controls$ } from '../tools';
 
 const shotGeometry = new THREE.BoxGeometry(1, 1, 1);
 const shotMaterial = new THREE.MeshBasicMaterial({
   color: 0xff0000
 });
 
-const Interval = Rx.Observable.interval(200)
+const interval$ = Rx.Observable.interval(200)
   .startWith(-1)
   .map(index => index + 1);
 
-const AddShot = Rx.Observable
+const addShot$ = Rx.Observable
   .merge(
     Rx.DOM.touchstart(renderer.domElement)
-      .flatMap(() => Interval.takeUntil(Rx.DOM.touchend(renderer.domElement))),
+      .flatMap(() => interval$.takeUntil(Rx.DOM.touchend(renderer.domElement))),
     Rx.Observable.fromEvent(document, 'keydown').filter(e => e.keyCode === 32)
-      .flatMap(x => Interval.takeUntil(Rx.Observable.fromEvent(document, 'keyup').filter(e => e.keyCode === 32)))
+      .flatMap(x => interval$.takeUntil(Rx.Observable.fromEvent(document, 'keyup').filter(e => e.keyCode === 32)))
   )
   .throttle(200);
 
-const RemoveShot = new Rx.Subject()
+const removeShot$ = new Rx.Subject()
 
 var usesDeviceOrientation;
 
-Controls.subscribe(function(controls){
+controls$.subscribe(function(controls){
   usesDeviceOrientation = controls.autoRotate === undefined;
 });
 
-export const Shots = Rx.Observable
+export const shots$ = Rx.Observable
   .merge(
-    AddShot.map(index => {
+    addShot$.map(index => {
       const shot = new THREE.Mesh(shotGeometry, shotMaterial)
       shot.rotation.x = camera.rotation.x * (usesDeviceOrientation ? -1 : 1);
       //shot.rotation.x = camera.rotation.x
@@ -45,7 +45,7 @@ export const Shots = Rx.Observable
 
       return shots => shots.concat(shot);
     }),
-    RemoveShot.map(removeShot => {
+    removeShot$.map(removeShot => {
       scene.remove(removeShot);
 
       return shots => shots.filter(shot => shot !== removeShot);
@@ -56,5 +56,5 @@ export const Shots = Rx.Observable
 
 //export const removeShot = RemoveShot.onNext;
 export function removeShot(shot){
-  RemoveShot.onNext(shot);
+  removeShot$.onNext(shot);
 };

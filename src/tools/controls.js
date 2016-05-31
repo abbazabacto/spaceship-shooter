@@ -11,7 +11,7 @@ import { fullscreen } from '../utils';
 const OrbitControlsSubject = new Rx.BehaviorSubject(); 
 OrbitControlsSubject.onNext(new THREE.OrbitControls(camera, renderer.domElement));
 
-const OrbitControls = OrbitControlsSubject
+const orbitControls$ = OrbitControlsSubject
   .map(function(orbitControls){
     orbitControls.target.set(
       camera.position.x,
@@ -25,7 +25,7 @@ const OrbitControls = OrbitControlsSubject
     return orbitControls;
   });
 
-const DeviceOrientationControls = Rx.Observable
+const deviceOrientationControls$ = Rx.Observable
   .fromEvent(window, 'deviceorientation')
   .filter(event => event.alpha)
   .map(function(){
@@ -38,7 +38,7 @@ const DeviceOrientationControls = Rx.Observable
   .takeUntil(Rx.Observable.fromEvent(window, 'deviceorientation'))
   .share();
 
-DeviceOrientationControls
+deviceOrientationControls$
   .flatMapLatest(function(){
     return Rx.Observable.fromEvent(renderer.domElement, 'click');
   })
@@ -46,4 +46,4 @@ DeviceOrientationControls
     fullscreen(renderer.domElement);
   });
 
-export const Controls = Rx.Observable.merge(OrbitControls, DeviceOrientationControls);
+export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$);

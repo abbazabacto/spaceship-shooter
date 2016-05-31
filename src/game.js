@@ -2,33 +2,33 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { scene, camera, renderer, EffectRenderer, Controls, AnimationFrame } from './tools';
-import { AspectRatio } from './utils';
-import { Stars, removeShot, Shots, removeEnemy, Enemies, addScore, SpaceshipMesh } from './actors';
+import { scene, camera, renderer, effectRenderer$, controls$, animationFrame$ } from './tools';
+import { aspectRatio$ } from './utils';
+import { stars$, removeShot, shots$, removeEnemy, enemies$, addScore, spaceshipMesh$ } from './actors';
 
 //compose
 document.body.appendChild(renderer.domElement);
 camera.position.set(0, 10, 0);
 scene.add(camera);
 
-SpaceshipMesh.subscribe(function(spaceShipMesh){
+spaceshipMesh$.subscribe(function(spaceShipMesh){
   var mesh = spaceShipMesh.clone();
   //mesh.position.y = 5;
   scene.add(mesh);
 });
 
-const Preload = Rx.Observable
+const preload$ = Rx.Observable
   .combineLatest(
-    SpaceshipMesh, Rx.DOM.ready(), 
+    spaceshipMesh$, Rx.DOM.ready(), 
     spaceshipMesh => ({ spaceshipMesh })
   );
 
 var light = new THREE.AmbientLight( 0xffffff ); // soft white light
 scene.add( light );
 
-const Game = Rx.Observable
+const game$ = Rx.Observable
   .combineLatest(
-   AnimationFrame, AspectRatio, EffectRenderer, Controls, Stars, Shots, Enemies, 
+   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, 
     function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies){
       return { 
         animationFrame,
@@ -45,8 +45,8 @@ const Game = Rx.Observable
   //otherwise frames could drop on overloading changes in other observables
   .distinctUntilChanged(({ animationFrame }) => animationFrame.timestamp);
 
-Preload
-  .flatMap(() => Game) 
+preload$
+  .flatMap(() => game$) 
   .subscribe(render);
 
 function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies }){

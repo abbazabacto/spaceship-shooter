@@ -7,7 +7,7 @@ import { getNow } from '../utils';
 const clock = new THREE.Clock();
 const startTimestamp = getNow();
 
-const AnimationFrame = Rx.Observable
+const animationFrame$ = Rx.Observable
   .generate(
     0,
     function (x) { return true; },
@@ -23,4 +23,4 @@ const AnimationFrame = Rx.Observable
   })
   .shareReplay();
   
-export { AnimationFrame, clock };
+export { animationFrame$, clock };
