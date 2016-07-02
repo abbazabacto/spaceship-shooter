@@ -15481,7 +15481,7 @@ _rx2.default.Observable.combineLatest(_utils.aspectRatio$, _tools.rendererStereo
     scoreHolder.position.z = -200;
     aspectRatio /= 2;
   } else {
-    scoreHolder.position.z = -100;
+    scoreHolder.position.z = -150;
   }
 
   scoreHolder.position.x = 90 * aspectRatio;
