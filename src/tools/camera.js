@@ -2,7 +2,7 @@ import THREE from 'three';
 import { getAspectRatio } from '../utils';
 import { renderer } from './renderer';
 
-const perspective = 90;
+const perspective = 75;
 const aspect = getAspectRatio(renderer.domElement);
 const near = 0.01;
 const far = 500;
