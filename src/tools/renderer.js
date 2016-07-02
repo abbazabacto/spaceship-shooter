@@ -39,14 +39,29 @@ export function setRenderEffect(enable){
 
 const buttons$ = new Rx.BehaviorSubject(document.getElementsByTagName('button'));
 
+// add tabindex -1 so parentNode can be used for unfocusing buttons on click
+buttons$.subscribe(buttons =>
+  Array.prototype.forEach.call(buttons, button =>
+    button.parentNode.setAttribute('tabindex', '-1'))
+);
+
 const click$ = buttons$
   .filter(buttons => buttons)
   .map(buttons => buttons[0])
-  .flatMap(button => Rx.Observable.fromEvent(button, 'click'))
+  .flatMap(button => Rx.Observable.fromEvent(button, 'click'));
 
 click$
-  .flatMap(() => rendererStereoEffect$.take(1))
-  .map(effectRenderer => !effectRenderer)
-  .subscribe((toggledEffectRenderer) => {
-    setRenderEffect(toggledEffectRenderer);
+  .flatMap((clickEvent) =>
+    rendererStereoEffect$
+      .take(1)
+      .map(effectRenderer => !effectRenderer)
+      .map(effectRenderer => {
+        return { effectRenderer, clickEvent };
+      })
+  )
+  .subscribe(({ effectRenderer, clickEvent }) => {
+    setRenderEffect(effectRenderer);
+    // unfocus on parentNode
+    clickEvent.srcElement.parentNode.focus();
+    clickEvent.stopPropagation();
   });
