@@ -39,11 +39,7 @@ const deviceOrientationControls$ = Rx.Observable
   .share();
 
 deviceOrientationControls$
-  .flatMapLatest(function(){
-    return Rx.Observable.fromEvent(renderer.domElement, 'click');
-  })
-  .subscribe(function(){
-    fullscreen(renderer.domElement);
-  });
+  .flatMapLatest(() => Rx.Observable.fromEvent(renderer.domElement, 'click'))
+  .subscribe(() => fullscreen(document.body));
 
 export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$);

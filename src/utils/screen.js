@@ -9,7 +9,7 @@ import { renderer } from '../tools/renderer';
 
 import { DomReady } from './misc';
 
-function createGetAspectRatio(container){
+const createGetAspectRatio = container => {
   return function getAspectRatio() {
     if(container.innerWidth){
       return container.innerWidth / container.innerHeight;
@@ -19,17 +19,17 @@ function createGetAspectRatio(container){
   }
 }
 
-export const getAspectRatio = createGetAspectRatio(renderer.domElement);
+export const getAspectRatio = createGetAspectRatio(window);
 
-export const aspectRatio$ = DomReady.flatMap(function(){
-  return Rx.Observable
-    .fromEvent(window, 'resize')
-    .map(getAspectRatio)
-    .startWith(getAspectRatio())
-    .shareReplay(1);
-}); 
+export const aspectRatio$ = Rx.Observable.merge(
+  DomReady,
+  Rx.Observable.fromEvent(window, 'resize')
+)
+.map(getAspectRatio)
+.startWith(getAspectRatio())
+.shareReplay(1);
 
-export function fullscreen(container){
+export const fullscreen = (container) => {
   if (container.requestFullscreen) {
     container.requestFullscreen();
   } else if (container.msRequestFullscreen) {
