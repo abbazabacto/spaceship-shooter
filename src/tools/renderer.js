@@ -2,8 +2,12 @@ import THREE from 'three';
 import Rx from 'rx';
 import '../../lib/effects/StereoEffect';
 
-export const renderer = new THREE.WebGLRenderer({ antialias: true });
+export const renderer = new THREE.WebGLRenderer({ 
+  antialias: true,
+  // alpha: true,
+});
 renderer.setPixelRatio(window.devicePixelRatio || 1);
+// renderer.setClearColor( 0xffffff, 0);
 
 const effect = new THREE.StereoEffect(renderer);
 
@@ -20,7 +24,7 @@ export const effectRenderer$ = rendererStereoEffect$
       seperator.style.top = '0';
       seperator.style.left = '50%';
       seperator.style.marginLeft = '-1px';
-      seperator.style.backgroundColor = '#fff';
+      seperator.style.backgroundColor = '#333';
       document.body.appendChild(seperator);
       
       return effect;
