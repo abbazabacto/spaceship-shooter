@@ -7,7 +7,7 @@ import { aspectRatio$ } from './utils';
 import { stars$, removeShot, shots$, removeEnemy, enemies$, addScore, spaceshipMesh$ } from './actors';
 
 //compose
-document.body.appendChild(renderer.domElement);
+document.body.insertBefore(renderer.domElement, document.body.children[0]);
 camera.position.set(0, 10, 0);
 scene.add(camera);
 

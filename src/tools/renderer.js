@@ -25,6 +25,10 @@ export const effectRenderer$ = rendererStereoEffect$
       
       return effect;
     } else {
+      var seperator = document.getElementById('stereo-seperator');
+      if (seperator) {
+        document.body.removeChild(seperator);
+      }
       return renderer;
     }
   });
@@ -33,4 +37,16 @@ export function setRenderEffect(enable){
   rendererStereoEffect$.onNext(enable);
 }
 
-//setRenderEffect(true);
+const buttons$ = new Rx.BehaviorSubject(document.getElementsByTagName('button'));
+
+const click$ = buttons$
+  .filter(buttons => buttons)
+  .map(buttons => buttons[0])
+  .flatMap(button => Rx.Observable.fromEvent(button, 'click'))
+
+click$
+  .flatMap(() => rendererStereoEffect$.take(1))
+  .map(effectRenderer => !effectRenderer)
+  .subscribe((toggledEffectRenderer) => {
+    setRenderEffect(toggledEffectRenderer);
+  });
