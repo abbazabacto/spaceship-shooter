@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "gulp",
     "cordova:android": "gulp build-cordova && (cd cordova && cordova run android)",
     "cordova:browser": "gulp build-cordova && (cd cordova && cordova run browser) && npm run chrome-canary",
     "cordova:browser:watch": "gulp watch-cordova",
