@@ -93,7 +93,7 @@ Rx.Observable
       scoreHolder.position.z = -200;
       aspectRatio /= 2;
     } else {
-      scoreHolder.position.z = -100;
+      scoreHolder.position.z = -150;
     }
     
     scoreHolder.position.x = 90 * aspectRatio;
