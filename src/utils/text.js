@@ -1,7 +1,7 @@
 import THREE from 'three';
-import '../../lib/GeometryUtils';
-import '../../lib/TextGeometry';
-import '../../lib/FontUtils';
+import '../../lib/text/GeometryUtils';
+import '../../lib/text/TextGeometry';
+import '../../lib/text/FontUtils';
 import '../../res/fonts/helvetiker_bold.typeface';
 import '../../res/fonts/helvetiker_regular.typeface';
 

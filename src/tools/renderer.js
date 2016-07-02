@@ -1,6 +1,6 @@
 import THREE from 'three';
 import Rx from 'rx';
-import '../../lib/StereoEffect';
+import '../../lib/effects/StereoEffect';
 
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio || 1);

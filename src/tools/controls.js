@@ -1,7 +1,7 @@
 import THREE from 'three';
 import Rx from 'rx';
-import '../../lib/OrbitControls';
-import '../../lib/DeviceOrientationControls';
+import '../../lib/controls/OrbitControls';
+import '../../lib/controls/DeviceOrientationControls';
 
 import { camera } from './camera';
 import { renderer } from './renderer';
