@@ -25,9 +25,10 @@ var browserSync = require('browser-sync').create();
 var path = require('path');
 var root = path.normalize(__dirname);
 
-gulp.task('watch', ['babelify'], function(){
+gulp.task('watch', ['build-cordova'], function(){
   browserSync.watch([
-    path.join(root, 'src/**/*.js')
+    path.join(root, 'src/**/*.js'),
+    path.join(root, 'lib/**/*.js')
   ], function(){ gulp.start('babelify'); });
   
   browserSync.watch([
@@ -40,15 +41,17 @@ gulp.task('serve', ['watch'], function(){
   browserSync.init({
     server: {
       baseDir: root
-    }
+    },
+    ghostMode: false,
   });
 });
 
 gulp.task('build-cordova', ['babelify'], function(){
   gulp.src(['./index.html'])
-    .pipe(replace('node_modules/three', 'lib'))
+    .pipe(replace('node_modules/three/build', 'lib'))
     .pipe(gulp.dest('./cordova/www'));
-  gulp.src(['./node_modules/three/three.js']).pipe(gulp.dest('./cordova/www/lib'));
+  gulp.src(['./node_modules/three/build/three.js']).pipe(gulp.dest('./cordova/www/lib'));
+  gulp.src(['./lib/WebVR.js']).pipe(gulp.dest('./cordova/www/lib/'));
   gulp.src(['./res/**/*']).pipe(gulp.dest('./cordova/www/res'));
   gulp.src(['./dist/**/*']).pipe(gulp.dest('./cordova/www/dist'));
 });
