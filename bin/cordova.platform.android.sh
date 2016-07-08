@@ -5,7 +5,7 @@ set -o errexit # Exit on error
 textReset=$(tput sgr0)
 textGreen=$(tput setaf 2)
 message_info () {
-  echo "${textGreen}[wms-app]${textReset} $1"
+  echo "${textGreen}[spaceshipshooter-app]${textReset} $1"
 }
 
 message_info "Creating necessary directories..."
