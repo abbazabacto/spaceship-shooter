@@ -29,7 +29,7 @@
     "gulp-watch": "^4.3.5",
     "rx": "^4.0.7",
     "rx-dom": "^7.0.3",
-    "three": "^0.73.2",
+    "three": "0.78.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
@@ -39,7 +39,8 @@
     ]
   },
   "browser": {
-    "three": "./node_modules/three/three,js"
+    "three": "./node_modules/three/build/three.js",
+    "webvr": "./lib/WebVR.js"
   },
   "browserify-shim": "browserify-shim-config.js"
 }
