@@ -8,17 +8,19 @@
 		html, body{
 			margin: 0;
 			padding: 0;
-			background-color: #fff;
+			background-color: #000;
 		}
-    
     canvas {
       height: 100%;
       width: 100%;
+			position: relative;
     }
-		button {
+    .settings {
 			position: absolute;
 			top: 0;
 			left: 0;
+		}
+		.settings button {
 			font-size: 1rem;
 			background: #000;
 			border: 1px solid #333;
@@ -28,25 +30,23 @@
 			outline: none;
 			cursor: pointer;
 		}
-		button svg {
+		.settings button svg {
 			pointer-events: none;
 		}
-		button path {
+		.settings button path {
 			fill: #333;
 			transition: fill 0.5s ease 0s;
 		}
-		button:hover path {
+		.settings button:hover path {
 			fill: #fff;
 		}
-		button:last-child {
+		.settings button:last-child {
 			display: none;
-			left: auto;
-			right: 0;
 		}
 	</style>
 </head>
 <body>
-	<div>
+	<div class="settings">
 		<button type="button">
 			<svg width="36px" height="36px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
 					<!-- Generator: Sketch 3.2.2 (9983) - http://www.bohemiancoding.com/sketch -->
