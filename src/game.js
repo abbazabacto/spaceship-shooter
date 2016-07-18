@@ -2,9 +2,26 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { scene, camera, renderer, effectRenderer$, controls$, animationFrame$ } from './tools';
+import { scene, camera, renderer, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
 import { aspectRatio$, getRad } from './utils';
 import { stars$, removeShot, shots$, removeEnemy, enemies$, addScore, spaceshipMesh$ } from './actors';
+
+stats$.subscribe(({ dom: domElement }) => {
+  domElement.style.position = 'absolute';
+  domElement.style.top = 'auto';
+  domElement.style.left = 'auto';
+  domElement.style.right = 0;
+  domElement.style.bottom = 0;
+  document.body.appendChild(domElement);
+});
+
+rendererStats$.subscribe(({ domElement }) => {
+  domElement.style.position = 'absolute';
+  domElement.style.top = 'auto';
+  domElement.style.left = 0;;
+  domElement.style.bottom  = 0;
+  document.body.appendChild(domElement);
+});
 
 //compose
 document.body.insertBefore(renderer.domElement, document.body.children[0]);
@@ -28,8 +45,8 @@ scene.add( light );
 
 const game$ = Rx.Observable
   .combineLatest(
-   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, 
-    function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies){
+   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, stats$, rendererStats$, 
+    function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats){
       return { 
         animationFrame,
         aspectRatio,
@@ -37,7 +54,9 @@ const game$ = Rx.Observable
         controls,
         stars,
         shots,
-        enemies
+        enemies,
+        stats,
+        rendererStats,
       };  
     }
   )
@@ -49,7 +68,7 @@ preload$
   .flatMap(() => game$) 
   .subscribe(render);
 
-function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies }){
+function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats }){
   //stars
   stars.forEach(function (star, index) {
     if (index % 3 === 0) {
@@ -116,4 +135,8 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, 
   
   //render
   effectRenderer.render(scene, camera);
+
+  //stats
+  stats.update();
+  rendererStats.update(renderer);
 }
