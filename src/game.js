@@ -3,7 +3,7 @@ import Rx from 'rx';
 import 'rx-dom';
 
 import { scene, camera, renderer, effectRenderer$, controls$, animationFrame$ } from './tools';
-import { aspectRatio$ } from './utils';
+import { aspectRatio$, getRad } from './utils';
 import { stars$, removeShot, shots$, removeEnemy, enemies$, addScore, spaceshipMesh$ } from './actors';
 
 //compose
@@ -13,7 +13,7 @@ scene.add(camera);
 
 spaceshipMesh$.subscribe(function(spaceShipMesh){
   var mesh = spaceShipMesh.clone();
-  //mesh.position.y = 5;
+  mesh.rotation.y = getRad(-180);
   scene.add(mesh);
 });
 
@@ -53,15 +53,15 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, 
   //stars
   stars.forEach(function (star, index) {
     if (index % 3 === 0) {
-      star.position.z -= (10 * animationFrame.delta);
+      star.position.z += (10 * animationFrame.delta);
     } else if (index % 3 === 1) {
-      star.position.z -= (20 * animationFrame.delta);
+      star.position.z += (20 * animationFrame.delta);
     } else if (index % 3 === 2) {
-      star.position.z -= (50 * animationFrame.delta);
+      star.position.z += (50 * animationFrame.delta);
     }
 
-    if (star.position.z < -500) {
-      star.position.z = 500;
+    if (star.position.z > 500) {
+      star.position.z = -500;
     }
   });
   

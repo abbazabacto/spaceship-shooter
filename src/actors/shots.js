@@ -4,7 +4,7 @@ import 'rx-dom';
 
 import { renderer, camera, scene, controls$ } from '../tools';
 
-const shotGeometry = new THREE.BoxGeometry(1, 1, 1);
+const shotGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8 );
 const shotMaterial = new THREE.MeshBasicMaterial({
   color: 0xff0000
 });
@@ -34,8 +34,8 @@ export const shots$ = Rx.Observable
   .merge(
     addShot$.map(index => {
       const shot = new THREE.Mesh(shotGeometry, shotMaterial)
-      shot.rotation.x = camera.rotation.x * (usesDeviceOrientation ? -1 : 1);
-      //shot.rotation.x = camera.rotation.x
+      //shot.rotation.x = camera.rotation.x * (usesDeviceOrientation ? -1 : 1);
+      shot.rotation.x = camera.rotation.x;
       shot.rotation.y = camera.rotation.y;
       shot.rotation.z = camera.rotation.z;
       
