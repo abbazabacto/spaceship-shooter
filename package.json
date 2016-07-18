@@ -40,7 +40,8 @@
   },
   "browser": {
     "three": "./node_modules/three/build/three.js",
-    "webvr": "./lib/WebVR.js"
+    "webvr": "./lib/WebVR.js",
+    "dat": "./lib/stats/dat.gui.js"
   },
   "browserify-shim": "browserify-shim-config.js"
 }
