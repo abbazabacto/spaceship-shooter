@@ -1,22 +1,35 @@
 import THREE from 'three';
 import Rx from 'rx';
 import '../../lib/effects/StereoEffect';
+import WEBVR from 'webvr';
+import '../../lib/effects/VREffect';
 
 export const renderer = new THREE.WebGLRenderer({ 
   antialias: true,
   // alpha: true,
 });
-renderer.setPixelRatio(window.devicePixelRatio || 1);
+// renderer.setPixelRatio(window.devicePixelRatio || 1);
+renderer.setPixelRatio(2);
 // renderer.setClearColor( 0xffffff, 0);
 
-const effect = new THREE.StereoEffect(renderer);
+const stereoEffect = new THREE.StereoEffect(renderer);
+const vrEffect = new THREE.VREffect(renderer);
 
 export const rendererStereoEffect$ = new Rx.BehaviorSubject();
 
+const buttons = document.getElementsByTagName('button');
+
+if (WEBVR.isAvailable() === true) {
+  buttons[1].style.display = 'block';
+  buttons[1].addEventListener('click', () => {
+    vrEffect.isPresenting ? vrEffect.exitPresent() : vrEffect.requestPresent()
+  });
+}
+
 export const effectRenderer$ = rendererStereoEffect$
-  .map(function(renderStereoEffect){
+  .map((renderStereoEffect) => {
     if(renderStereoEffect){
-      var seperator = document.createElement('div');
+      const seperator = document.createElement('div');
       seperator.id = 'stereo-seperator';
       seperator.style.height = '100%';
       seperator.style.width = '2px';
@@ -27,13 +40,13 @@ export const effectRenderer$ = rendererStereoEffect$
       seperator.style.backgroundColor = '#333';
       document.body.appendChild(seperator);
       
-      return effect;
+      return stereoEffect;
     } else {
-      var seperator = document.getElementById('stereo-seperator');
+      const seperator = document.getElementById('stereo-seperator');
       if (seperator) {
         document.body.removeChild(seperator);
       }
-      return renderer;
+      return vrEffect;
     }
   });
 
@@ -41,7 +54,7 @@ export function setRenderEffect(enable){
   rendererStereoEffect$.onNext(enable);
 }
 
-const buttons$ = new Rx.BehaviorSubject(document.getElementsByTagName('button'));
+const buttons$ = new Rx.BehaviorSubject(buttons);
 
 // add tabindex -1 so parentNode can be used for unfocusing buttons on click
 buttons$.subscribe(buttons =>

@@ -2,21 +2,22 @@ import THREE from 'three';
 import Rx from 'rx';
 import '../../lib/controls/OrbitControls';
 import '../../lib/controls/DeviceOrientationControls';
+import '../../lib/controls/VRControls';
 
 import { camera } from './camera';
 import { renderer } from './renderer';
 
 import { fullscreen } from '../utils';
 
-const OrbitControlsSubject = new Rx.BehaviorSubject(); 
-OrbitControlsSubject.onNext(new THREE.OrbitControls(camera, renderer.domElement));
+const orbitControlsSubject$ = new Rx.BehaviorSubject(); 
+orbitControlsSubject$.onNext(new THREE.OrbitControls(camera, renderer.domElement));
 
-const orbitControls$ = OrbitControlsSubject
+const orbitControls$ = orbitControlsSubject$
   .map(function(orbitControls){
     orbitControls.target.set(
       camera.position.x,
       camera.position.y,
-      camera.position.z + 0.0001
+      camera.position.z - 0.0001
     );
     
     orbitControls.noPan = true;
@@ -25,21 +26,40 @@ const orbitControls$ = OrbitControlsSubject
     return orbitControls;
   });
 
+const vrControlsSubject$ = new Rx.BehaviorSubject();
+let hasVRControls = true;
+const vrControls = new THREE.VRControls(camera, () => {
+  console.log('should be false');
+  hasVRControls = false;
+});
+vrControlsSubject$.onNext(hasVRControls ? vrControls : undefined);
+
 const deviceOrientationControls$ = Rx.Observable
   .fromEvent(window, 'deviceorientation')
   .filter(event => event.alpha)
-  .map(function(){
-    const deviceOrientationControls = new THREE.DeviceOrientationControls(camera, true);
-    deviceOrientationControls.connect();
-    deviceOrientationControls.update();
-    
-    return deviceOrientationControls;
-  })
+  .flatMap(() =>
+    vrControlsSubject$
+      .map((vrControls) => {
+        console.log('vrcontrols', vrControls);
+        if (vrControls) {
+          // vrControls.update();
+          vrControls.resetPose();
+          return vrControls;
+        }
+
+        const deviceOrientationControls = new THREE.DeviceOrientationControls(camera, true);
+        deviceOrientationControls.connect();
+        deviceOrientationControls.update();
+        
+        return deviceOrientationControls;
+      })
+  )
   .takeUntil(Rx.Observable.fromEvent(window, 'deviceorientation'))
   .share();
 
-deviceOrientationControls$
-  .flatMapLatest(() => Rx.Observable.fromEvent(renderer.domElement, 'click'))
-  .subscribe(() => fullscreen(document.body));
+// deviceOrientationControls$
+//   .flatMapLatest(() => Rx.Observable.fromEvent(renderer.domElement, 'click'))
+//   .subscribe(() => fullscreen(document.body));
 
-export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$);
+export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$)
+  .takeUntil(deviceOrientationControls$);
