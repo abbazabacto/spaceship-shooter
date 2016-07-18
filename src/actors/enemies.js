@@ -36,7 +36,7 @@ export const enemies$ = Rx.Observable
 
       enemy.position.x = randomFromRange(-250, 250);
       enemy.position.y = randomFromRange(-250, 250);
-      enemy.position.z = 500;
+      enemy.position.z = -500;
       enemy.lookAt(new THREE.Vector3(
         camera.position.x,
         camera.position.y + 2,
