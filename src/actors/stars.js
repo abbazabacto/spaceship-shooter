@@ -1,29 +1,46 @@
 import THREE from 'three';
 import Rx from 'rx';
 
-import { scene } from '../tools';
-import { randomFromRange } from '../utils';
+import { scene, createGui } from '../tools';
+import { randomFromRange, range } from '../utils';
 
-const starGeometries = [createStarGeometry(0.25)];
-// const starGeometries = [createStarGeometry(0.15), createStarGeometry(1), createStarGeometry(5)];
+// const starGeometries = [createStarGeometry(0.25)];
+const starGeometries = [createStarGeometry(1), createStarGeometry(0.25), createStarGeometry(0.5)];
 const starMaterial = new THREE.MeshBasicMaterial({
   color: 0xf1f1f1
 });
 
-export const stars$ = Rx.Observable.range(0, 1000)
-  .map(function () {
-    var star = new THREE.Mesh(starGeometries[Math.floor(Math.random() * starGeometries.length)], starMaterial);
-    star.position.x = randomFromRange(-500, 500);
-    star.position.y = randomFromRange(-500, 500);
-    star.position.z = randomFromRange(-500, 500);
-    
-    scene.add(star);
-    
-    return star;
-  })
-  .toArray()
+const STARSAMOUNT_INITIAL = 500;
+
+const addStars$ = createGui('stars', STARSAMOUNT_INITIAL, 0, 1000, 50)
+  .debounce(1000)
+  .map(starsAmount => parseInt(starsAmount, 10))
+  .startWith(STARSAMOUNT_INITIAL)
+  .flatMap(starsAmount =>
+    Rx.Observable.of(
+      range(0, starsAmount)
+        .map((stars) => {
+          const star = new THREE.Mesh(starGeometries[Math.floor(Math.random() * starGeometries.length)], starMaterial);
+          star.position.x = randomFromRange(-500, 500);
+          star.position.y = randomFromRange(-500, 500);
+          star.position.z = randomFromRange(-500, 500);
+          return star;
+        })
+    )
+  );
+
+export const stars$ = addStars$
+  .scan((oldStars = [], newStars = []) => {
+    oldStars.map(star => {
+      scene.remove(star);
+    });
+    return newStars.map(star => {
+      scene.add(star);
+      return star;
+    });
+  }, [])
   .startWith([]);
 
-function createStarGeometry(size) {
-  return new THREE.SphereGeometry(size, 16, 8);
+function createStarGeometry(size, fraction = 8) {
+  return new THREE.SphereGeometry(size, fraction, fraction);
 }
