@@ -1501,7 +1501,6 @@ THREEx.Planets.createVenus = function () {
 
 THREEx.Planets.createEarth = function (size) {
 	var geometry = new THREE.SphereGeometry(size || 0.5, 32, 32);
-	console.log(THREEx.Planets.baseURL + 'images/earthmap1k.jpg');
 	var material = new THREE.MeshPhongMaterial({
 		map: loader.load(THREEx.Planets.baseURL + 'images/earthmap1k.jpg'),
 		bumpMap: loader.load(THREEx.Planets.baseURL + 'images/earthbump1k.jpg'),
@@ -16521,13 +16520,12 @@ var _misc = require('../utils/misc');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_threex2.default.Planets.baseURL = '../lib/planets/';
+_threex2.default.Planets.baseURL = '/lib/planets/';
 
 var mesh = _threex2.default.Planets.createEarth(2000);
 mesh.position.y = -2400;
 mesh.rotation.x = (0, _misc.getRad)(90);
 mesh.rotation.y = (0, _misc.getRad)(90);
-console.log(mesh);
 _scene.scene.add(mesh);
 
 var earth$ = exports.earth$ = _rx2.default.Observable.of(mesh);
