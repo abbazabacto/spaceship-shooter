@@ -51,7 +51,7 @@ gulp.task('build-cordova', ['babelify'], function(){
     .pipe(replace('node_modules/three/build', 'lib'))
     .pipe(gulp.dest('./cordova/www'));
   gulp.src(['./node_modules/three/build/three.js']).pipe(gulp.dest('./cordova/www/lib'));
-  gulp.src(['./lib/WebVR.js']).pipe(gulp.dest('./cordova/www/lib/'));
+  gulp.src(['./lib/**/*']).pipe(gulp.dest('./cordova/www/lib/'));
   gulp.src(['./res/**/*']).pipe(gulp.dest('./cordova/www/res'));
   gulp.src(['./dist/**/*']).pipe(gulp.dest('./cordova/www/dist'));
 });
