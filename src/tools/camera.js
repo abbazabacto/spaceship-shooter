@@ -8,6 +8,6 @@ const near = 0.01;
 const far = 500;
 
 const camera = new THREE.PerspectiveCamera(perspective, aspect, near, far);
-camera.position.set(0, 10, 0);
+camera.position.set(0, 0, 0);
 
 export { camera };

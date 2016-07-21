@@ -7,8 +7,6 @@ import '../../lib/controls/VRControls';
 import { camera } from './camera';
 import { renderer } from './renderer';
 
-import { fullscreen } from '../utils';
-
 const orbitControlsSubject$ = new Rx.BehaviorSubject(); 
 orbitControlsSubject$.onNext(new THREE.OrbitControls(camera, renderer.domElement));
 
@@ -56,10 +54,6 @@ const deviceOrientationControls$ = Rx.Observable
   )
   .takeUntil(Rx.Observable.fromEvent(window, 'deviceorientation'))
   .share();
-
-// deviceOrientationControls$
-//   .flatMapLatest(() => Rx.Observable.fromEvent(renderer.domElement, 'click'))
-//   .subscribe(() => fullscreen(document.body));
 
 export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$)
   .takeUntil(deviceOrientationControls$);
