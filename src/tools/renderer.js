@@ -3,28 +3,23 @@ import Rx from 'rx';
 import '../../lib/effects/StereoEffect';
 import WEBVR from 'webvr';
 import '../../lib/effects/VREffect';
+import { fullscreen } from '../utils/screen';
+import { webRtcVideo$ } from '../utils/webrtc';
+
+const gameElement = document.getElementsByTagName('game')[0];
+const buttons = document.getElementsByTagName('button');
 
 export const renderer = new THREE.WebGLRenderer({ 
   antialias: true,
-  // alpha: true,
+  alpha: true,
 });
-// renderer.setPixelRatio(window.devicePixelRatio || 1);
-renderer.setPixelRatio(2);
-// renderer.setClearColor( 0xffffff, 0);
+renderer.setPixelRatio(window.devicePixelRatio || 1);
+// renderer.setClearColor( 0x000000, 1);
 
 const stereoEffect = new THREE.StereoEffect(renderer);
 const vrEffect = new THREE.VREffect(renderer);
 
-export const rendererStereoEffect$ = new Rx.BehaviorSubject();
-
-const buttons = document.getElementsByTagName('button');
-
-if (WEBVR.isAvailable() === true) {
-  buttons[1].style.display = 'block';
-  buttons[1].addEventListener('click', () => {
-    vrEffect.isPresenting ? vrEffect.exitPresent() : vrEffect.requestPresent()
-  });
-}
+export const rendererStereoEffect$ = new Rx.BehaviorSubject(false);
 
 export const effectRenderer$ = rendererStereoEffect$
   .map((renderStereoEffect) => {
@@ -38,13 +33,13 @@ export const effectRenderer$ = rendererStereoEffect$
       seperator.style.left = '50%';
       seperator.style.marginLeft = '-1px';
       seperator.style.backgroundColor = '#333';
-      document.body.appendChild(seperator);
+      gameElement.appendChild(seperator);
       
       return stereoEffect;
     } else {
       const seperator = document.getElementById('stereo-seperator');
       if (seperator) {
-        document.body.removeChild(seperator);
+        gameElement.removeChild(seperator);
       }
       return vrEffect;
     }
@@ -54,31 +49,87 @@ export function setRenderEffect(enable){
   rendererStereoEffect$.onNext(enable);
 }
 
-const buttons$ = new Rx.BehaviorSubject(buttons);
-
 // add tabindex -1 so parentNode can be used for unfocusing buttons on click
-buttons$.subscribe(buttons =>
-  Array.prototype.forEach.call(buttons, button =>
-    button.parentNode.setAttribute('tabindex', '-1'))
-);
+Array.prototype.forEach.call(buttons, button => {
+  button.parentNode.setAttribute('tabindex', '-1');
+  button.parentNode.style.outline = 'none';
+});
 
-const click$ = buttons$
-  .filter(buttons => buttons)
-  .map(buttons => buttons[0])
-  .flatMap(button => Rx.Observable.fromEvent(button, 'click'));
+const enableStereoRender$ = toggleButton(buttons[0]);
+const enableWebRtc$ = toggleButton(buttons[2]).share();
 
-click$
-  .flatMap((clickEvent) =>
-    rendererStereoEffect$
-      .take(1)
-      .map(effectRenderer => !effectRenderer)
-      .map(effectRenderer => {
-        return { effectRenderer, clickEvent };
-      })
+if (WEBVR.isAvailable() === true) {
+  buttons[1].style.display = 'block';
+
+  toggleButton(buttons[1]).subscribe((enableWebVr) => {
+    vrEffect.disabled = false;
+    if (vrEffect.isPresenting) {
+      // renderer.setClearColor( 0x000000, 0);
+      // renderer.domElement.style.background = '';
+      vrEffect.exitPresent();
+    } else {
+      // renderer.setClearColor( 0x000000, 1);
+      // renderer.domElement.style.background = '#000';
+      vrEffect.requestPresent();
+    }
+    enableWebVr && fullscreen(gameElement);
+  });
+
+  enableStereoRender$
+    .subscribe(enableStereoRender => {
+      vrEffect.disabled = enableStereoRender;
+    });
+
+  // prevent VREffect from kicking in on fullscreen event
+  enableWebRtc$
+    .subscribe(enableWebRtc => {
+      vrEffect.disabled = enableWebRtc;
+    });
+}
+
+enableStereoRender$
+  // need side-effect as fullscreen needs to happen direct after click as initiator
+  .do(enableStereoRender => enableStereoRender && fullscreen(gameElement))
+  .withLatestFrom(
+    rendererStereoEffect$.map(effectRenderer => !effectRenderer),
+    (clickEvent, effectRenderer) => ({ clickEvent, effectRenderer })
   )
   .subscribe(({ effectRenderer, clickEvent }) => {
     setRenderEffect(effectRenderer);
-    // unfocus on parentNode
-    clickEvent.srcElement.parentNode.focus();
-    clickEvent.stopPropagation();
   });
+
+webRtcVideo$.take(1).subscribe(() => {
+  buttons[2].style.display = 'block';
+});
+
+enableWebRtc$.subscribe(enableWebRtc => {
+  enableWebRtc && fullscreen(gameElement);
+});
+
+// toggle webrtc stereo render
+Rx.Observable.combineLatest(
+  rendererStereoEffect$,
+  enableWebRtc$.flatMapLatest(enableWebRtc =>
+    enableWebRtc ? webRtcVideo$ : Rx.Observable.of(undefined)
+  ),
+  (rendererStereoEffect, webRtcVideo) => ({ rendererStereoEffect, webRtcVideo })
+)
+.filter(({ webRtcVideo }) => !!webRtcVideo)
+.subscribe(({ rendererStereoEffect, webRtcVideo }) => {
+  webRtcVideo(rendererStereoEffect);
+});
+
+function toggleButton(button, initState) {
+  return Rx.Observable.of(initState || false)
+    .flatMap(state =>
+      Rx.Observable.fromEvent(button, 'click').do(removeFocus)
+        .do(() => (state = !state))
+        .map(() => state)
+        .do(state => button.classList[state ? 'add' : 'remove']('enabled'))
+    );
+}
+
+const buttonHolder = buttons[0].parentElement;
+function removeFocus() {
+  buttonHolder.focus();
+}
