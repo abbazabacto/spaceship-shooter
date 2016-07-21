@@ -2,7 +2,11 @@ import THREE from 'three';
 import Rx from 'rx';
 
 import THREEx from '../../lib/planets/threex.planets';
+
 THREEx.Planets.baseURL = '/lib/planets/';
+if(window.location.pathname.indexOf('/spaceship-shooter') === 0) {
+  THREEx.Planets.baseURL = `/spaceship-shooter/${THREEx.Planets.baseURL}`;
+}
 
 import _, { createAtmosphereMaterial } from '../../lib/planets/threex.atmospherematerial';
 
