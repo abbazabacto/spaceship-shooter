@@ -16521,6 +16521,9 @@ var _misc = require('../utils/misc');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _threex2.default.Planets.baseURL = '/lib/planets/';
+if (window.location.pathname.indexOf('/spaceship-shooter') === 0) {
+  _threex2.default.Planets.baseURL = '/spaceship-shooter/' + _threex2.default.Planets.baseURL;
+}
 
 var mesh = _threex2.default.Planets.createEarth(2000);
 mesh.position.y = -2400;
