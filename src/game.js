@@ -26,11 +26,12 @@ rendererStats$.subscribe(({ domElement }) => {
 //compose
 const gameElement = document.getElementsByTagName('game')[0];
 gameElement.appendChild(renderer.domElement);
-camera.position.set(0, 10, 0);
+camera.position.set(0, 0, 0);
 scene.add(camera);
 
 spaceshipMesh$.subscribe(function(spaceShipMesh){
   var mesh = spaceShipMesh.clone();
+  mesh.position.y = -10;
   mesh.rotation.y = getRad(-180);
   scene.add(mesh);
 });

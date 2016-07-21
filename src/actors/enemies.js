@@ -39,7 +39,7 @@ export const enemies$ = Rx.Observable
       enemy.position.z = -500;
       enemy.lookAt(new THREE.Vector3(
         camera.position.x,
-        camera.position.y + 2,
+        camera.position.y + 10,
         camera.position.z));
       scene.add(enemy);
 

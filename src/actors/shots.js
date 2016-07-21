@@ -34,6 +34,7 @@ export const shots$ = Rx.Observable
   .merge(
     addShot$.map(index => {
       const shot = new THREE.Mesh(shotGeometry, shotMaterial)
+      shot.position.y = camera.position.y - 10;
       //shot.rotation.x = camera.rotation.x * (usesDeviceOrientation ? -1 : 1);
       shot.rotation.x = camera.rotation.x;
       shot.rotation.y = camera.rotation.y;
