@@ -24,7 +24,8 @@ rendererStats$.subscribe(({ domElement }) => {
 });
 
 //compose
-document.body.insertBefore(renderer.domElement, document.body.children[0]);
+const gameElement = document.getElementsByTagName('game')[0];
+gameElement.appendChild(renderer.domElement);
 camera.position.set(0, 10, 0);
 scene.add(camera);
 
