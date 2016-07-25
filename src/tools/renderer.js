@@ -6,6 +6,8 @@ import '../../lib/effects/VREffect';
 import { fullscreen } from '../utils/screen';
 import { webRtcVideo$ } from '../utils/webrtc';
 
+import { enableStarField } from '../actors/planets';
+
 const gameElement = document.getElementsByTagName('game')[0];
 const buttons = document.getElementsByTagName('button');
 
@@ -15,6 +17,7 @@ export const renderer = new THREE.WebGLRenderer({
 });
 renderer.setPixelRatio(window.devicePixelRatio || 1);
 // renderer.setClearColor( 0x000000, 1);
+renderer.shadowMap.enabled	= true
 
 const stereoEffect = new THREE.StereoEffect(renderer);
 const vrEffect = new THREE.VREffect(renderer);
@@ -34,7 +37,7 @@ export const effectRenderer$ = rendererStereoEffect$
       seperator.style.marginLeft = '-1px';
       seperator.style.backgroundColor = '#333';
       gameElement.appendChild(seperator);
-      
+
       return stereoEffect;
     } else {
       const seperator = document.getElementById('stereo-seperator');
@@ -104,6 +107,7 @@ webRtcVideo$.take(1).subscribe(() => {
 
 enableWebRtc$.subscribe(enableWebRtc => {
   enableWebRtc && fullscreen(gameElement);
+  enableStarField(!enableWebRtc);
 });
 
 // toggle webrtc stereo render
