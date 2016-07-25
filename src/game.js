@@ -4,7 +4,7 @@ import 'rx-dom';
 
 import { scene, camera, renderer, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
 import { aspectRatio$, getRad } from './utils';
-import { stars$, removeShot, shots$, removeEnemy, enemies$, addScore, spaceshipMesh$ } from './actors';
+import { stars$, removeShot, shots$, removeEnemy, enemies$, addScore, spaceshipMesh$, earth$ } from './actors';
 
 stats$.subscribe(({ dom: domElement }) => {
   domElement.style.position = 'absolute';
@@ -42,13 +42,13 @@ const preload$ = Rx.Observable
     spaceshipMesh => ({ spaceshipMesh })
   );
 
-var light = new THREE.AmbientLight( 0xffffff ); // soft white light
+var light = new THREE.AmbientLight( 0x111111 );
 scene.add( light );
 
 const game$ = Rx.Observable
   .combineLatest(
-   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, stats$, rendererStats$, 
-    function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats){
+   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, stats$, rendererStats$, earth$, 
+    function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth){
       return { 
         animationFrame,
         aspectRatio,
@@ -59,6 +59,7 @@ const game$ = Rx.Observable
         enemies,
         stats,
         rendererStats,
+        earth,
       };  
     }
   )
@@ -70,7 +71,9 @@ preload$
   .flatMap(() => game$) 
   .subscribe(render);
 
-function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats }){
+function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth }){
+  earth.rotation.x += getRad(1) * animationFrame.delta;
+
   //stars
   stars.forEach(function (star, index) {
     if (index % 3 === 0) {
@@ -120,7 +123,7 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, 
   enemies.forEach(function (enemy) {
     enemy.translateZ(50 * animationFrame.delta);
 
-    if (enemy.position.z < -500) {
+    if (enemy.position.z > 500) {
       removeEnemy(enemy);
     }
   });
