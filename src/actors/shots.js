@@ -17,8 +17,9 @@ const addShot$ = Rx.Observable
   .merge(
     Rx.DOM.touchstart(renderer.domElement)
       .flatMap(() => interval$.takeUntil(Rx.DOM.touchend(renderer.domElement))),
-    Rx.DOM.mousedown(document)
-      .flatMap(() => interval$.takeUntil(Rx.DOM.mouseup(document)).takeUntil(Rx.DOM.touchend(renderer.domElement))),
+    // only on fullscreen webvr modus
+    // Rx.DOM.mousedown(document)
+    //   .flatMap(() => interval$.takeUntil(Rx.DOM.mouseup(document)).takeUntil(Rx.DOM.touchend(renderer.domElement))),
     Rx.Observable.fromEvent(document, 'keydown').filter(e => e.keyCode === 32)
       .flatMap(x => interval$.takeUntil(Rx.Observable.fromEvent(document, 'keyup').filter(e => e.keyCode === 32)))
   )
