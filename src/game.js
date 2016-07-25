@@ -72,7 +72,7 @@ preload$
   .subscribe(render);
 
 function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth }){
-  earth.rotation.x += getRad(1) * animationFrame.delta;
+  earth.rotation.x += getRad(0.3) * animationFrame.delta;
 
   //stars
   stars.forEach(function (star, index) {
