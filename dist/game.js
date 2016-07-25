@@ -16535,7 +16535,7 @@ containerEarth.rotation.z = (0, _misc.getRad)(90);
 _scene.scene.add(containerEarth);
 
 var moonMesh = _threex2.default.Planets.createMoon(3000);
-moonMesh.position.set(8000, 0, 0);
+moonMesh.position.set(8000, 0, -1500);
 moonMesh.scale.multiplyScalar(1 / 5);
 moonMesh.receiveShadow = true;
 moonMesh.castShadow = true;
@@ -16623,11 +16623,13 @@ var addScore$ = new _rx2.default.Subject();
 
 var removeScore$ = new _rx2.default.Subject();
 
+var INIT_SCORE = 0;
+
 var score$ = exports.score$ = _rx2.default.Observable.merge(addScore$, removeScore$.map(function (points) {
   return points * -1;
 })).scan(function (score, points) {
   return score + points;
-}, 0).startWith(0).shareReplay();
+}, INIT_SCORE).startWith(INIT_SCORE).shareReplay();
 
 var scoreHolder = new THREE.Object3D();
 scoreHolder.position.x = 90;
