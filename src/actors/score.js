@@ -7,13 +7,15 @@ const addScore$ = new Rx.Subject();
 
 const removeScore$ = new Rx.Subject();
 
+const INIT_SCORE = 0;
+
 export const score$ = Rx.Observable
   .merge(
     addScore$,
     removeScore$.map(points => points * -1)
   )
-  .scan((score, points) => score + points, 0)
-  .startWith(0)
+  .scan((score, points) => score + points, INIT_SCORE)
+  .startWith(INIT_SCORE)
   .shareReplay();
 
 const scoreHolder = new THREE.Object3D();
