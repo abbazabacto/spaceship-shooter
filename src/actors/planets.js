@@ -21,7 +21,7 @@ containerEarth.rotation.z = getRad(90);
 scene.add(containerEarth);
 
 const moonMesh = THREEx.Planets.createMoon(3000);
-moonMesh.position.set(8000, 0, 0);
+moonMesh.position.set(8000, 0, -1500);
 moonMesh.scale.multiplyScalar(1/5);
 moonMesh.receiveShadow = true;
 moonMesh.castShadow	= true;
