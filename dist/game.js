@@ -1465,8 +1465,8 @@ THREEx.Planets.baseURL = '../';
 
 var loader = new THREE.TextureLoader();
 
-THREEx.Planets.createSun = function () {
-	var geometry = new THREE.SphereGeometry(0.5, 32, 32);
+THREEx.Planets.createSun = function (size, fragments) {
+	var geometry = new THREE.SphereGeometry(size || 0.5, fragments || 32, fragments || 32);
 	var texture = loader.load(THREEx.Planets.baseURL + 'images/sunmap.jpg');
 	var material = new THREE.MeshPhongMaterial({
 		map: texture,
@@ -1499,20 +1499,21 @@ THREEx.Planets.createVenus = function () {
 	return mesh;
 };
 
-THREEx.Planets.createEarth = function (size) {
-	var geometry = new THREE.SphereGeometry(size || 0.5, 32, 32);
+THREEx.Planets.createEarth = function (size, segments) {
+	var geometry = new THREE.SphereGeometry(size || 0.5, segments || 32, segments || 32);
 	var material = new THREE.MeshPhongMaterial({
 		map: loader.load(THREEx.Planets.baseURL + 'images/earthmap1k.jpg'),
 		bumpMap: loader.load(THREEx.Planets.baseURL + 'images/earthbump1k.jpg'),
 		bumpScale: 0.05,
 		specularMap: loader.load(THREEx.Planets.baseURL + 'images/earthspec1k.jpg'),
-		specular: new THREE.Color('grey')
+		specular: new THREE.Color('grey'),
+		shininess: 10
 	});
 	var mesh = new THREE.Mesh(geometry, material);
 	return mesh;
 };
 
-THREEx.Planets.createEarthCloud = function () {
+THREEx.Planets.createEarthCloud = function (size, fragments) {
 	// create destination canvas
 	var canvasResult = document.createElement('canvas');
 	canvasResult.width = 1024;
@@ -1559,7 +1560,7 @@ THREEx.Planets.createEarthCloud = function () {
 	}, false);
 	imageMap.src = THREEx.Planets.baseURL + 'images/earthcloudmap.jpg';
 
-	var geometry = new THREE.SphereGeometry(0.51, 32, 32);
+	var geometry = new THREE.SphereGeometry(size || 0.51, fragments || 32, fragments || 32);
 	var material = new THREE.MeshPhongMaterial({
 		map: new THREE.Texture(canvasResult),
 		side: THREE.DoubleSide,
@@ -1570,12 +1571,13 @@ THREEx.Planets.createEarthCloud = function () {
 	return mesh;
 };
 
-THREEx.Planets.createMoon = function () {
-	var geometry = new THREE.SphereGeometry(0.5, 32, 32);
+THREEx.Planets.createMoon = function (size, fragments) {
+	var geometry = new THREE.SphereGeometry(size || 0.5, fragments || 32, fragments || 32);
 	var material = new THREE.MeshPhongMaterial({
 		map: loader.load(THREEx.Planets.baseURL + 'images/moonmap1k.jpg'),
 		bumpMap: loader.load(THREEx.Planets.baseURL + 'images/moonbump1k.jpg'),
-		bumpScale: 0.002
+		bumpScale: 0.002,
+		shininess: 10
 	});
 	var mesh = new THREE.Mesh(geometry, material);
 	return mesh;
@@ -16496,7 +16498,7 @@ function removeEnemy(enemy) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.earth$ = undefined;
+exports.enableStarField = exports.earth$ = undefined;
 
 var _three = (typeof window !== "undefined" ? window['THREE'] : typeof global !== "undefined" ? global['THREE'] : null);
 
@@ -16525,16 +16527,75 @@ if (window.location.pathname.indexOf('/spaceship-shooter') === 0) {
   _threex2.default.Planets.baseURL = '/spaceship-shooter/' + _threex2.default.Planets.baseURL;
 }
 
-var mesh = _threex2.default.Planets.createEarth(2000);
-mesh.position.y = -2400;
-mesh.rotation.x = (0, _misc.getRad)(90);
-mesh.rotation.y = (0, _misc.getRad)(90);
-_scene.scene.add(mesh);
+var containerEarth = new _three2.default.Object3D();
+containerEarth.position.y = -3400;
+containerEarth.position.z = -20;
+containerEarth.rotation.x = (0, _misc.getRad)(-90);
+containerEarth.rotation.z = (0, _misc.getRad)(90);
+_scene.scene.add(containerEarth);
 
-var earth$ = exports.earth$ = _rx2.default.Observable.of(mesh);
+var moonMesh = _threex2.default.Planets.createMoon(3000);
+moonMesh.position.set(6000, 0, 0);
+moonMesh.scale.multiplyScalar(1 / 5);
+moonMesh.receiveShadow = true;
+moonMesh.castShadow = true;
+containerEarth.add(moonMesh);
 
-var starSphere = _threex2.default.Planets.createStarfield(490);
-// scene.add(starSphere);
+var earthMesh = _threex2.default.Planets.createEarth(3000, 64);
+earthMesh.receiveShadow = true;
+earthMesh.castShadow = true;
+containerEarth.add(earthMesh);
+
+var geometry = new _three2.default.SphereGeometry(3000, 64, 64);
+var material = (0, _threex3.createAtmosphereMaterial)();
+material.uniforms.glowColor.value.set(0x00b3ff);
+material.uniforms.coeficient.value = 0.8;
+material.uniforms.power.value = 2.0;
+
+var mesh = new _three2.default.Mesh(geometry, material);
+mesh.scale.multiplyScalar(1.005);
+containerEarth.add(mesh);
+// new THREEx.addAtmosphereMaterial2DatGui(material, datGUI)
+
+var geometry = new _three2.default.SphereGeometry(3000, 64, 64);
+var material = (0, _threex3.createAtmosphereMaterial)();
+material.side = _three2.default.BackSide;
+material.uniforms.glowColor.value.set(0x00b3ff);
+material.uniforms.coeficient.value = 0.5;
+material.uniforms.power.value = 4.0;
+var mesh = new _three2.default.Mesh(geometry, material);
+mesh.scale.multiplyScalar(1.05);
+containerEarth.add(mesh);
+// new THREEx.addAtmosphereMaterial2DatGui(material, datGUI)
+
+var earthCloud = _threex2.default.Planets.createEarthCloud(3000);
+earthCloud.receiveShadow = true;
+earthCloud.castShadow = true;
+containerEarth.add(earthCloud);
+
+var earth$ = exports.earth$ = _rx2.default.Observable.of(containerEarth);
+
+var sunLight = new _three2.default.DirectionalLight(0xffffff, 1);
+sunLight.position.set(0, 200, 6000);
+sunLight.target.position.set(0, -3400, -6000);
+_scene.scene.add(sunLight);
+sunLight.castShadow = true;
+sunLight.shadow.bias = 0.001;
+// sunLight.shadow.Darkness = 0.2; ?? removed
+sunLight.shadow.mapSize.Width = 1024;
+sunLight.shadow.mapSize.Height = 1024;
+
+var starField = _threex2.default.Planets.createStarfield(19900);
+
+var showStarField$ = new _rx2.default.BehaviorSubject(true);
+
+showStarField$.subscribe(function (showStarField) {
+  return _scene.scene[showStarField ? 'add' : 'remove'](starField);
+});
+
+var enableStarField = exports.enableStarField = function enableStarField(enabled) {
+  return showStarField$.onNext(enabled);
+};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
@@ -16682,9 +16743,11 @@ var interval$ = _rx2.default.Observable.interval(200).startWith(-1).map(function
 
 var addShot$ = _rx2.default.Observable.merge(_rx2.default.DOM.touchstart(_tools.renderer.domElement).flatMap(function () {
   return interval$.takeUntil(_rx2.default.DOM.touchend(_tools.renderer.domElement));
-}), _rx2.default.DOM.mousedown(document).flatMap(function () {
-  return interval$.takeUntil(_rx2.default.DOM.mouseup(document)).takeUntil(_rx2.default.DOM.touchend(_tools.renderer.domElement));
-}), _rx2.default.Observable.fromEvent(document, 'keydown').filter(function (e) {
+}),
+// only on fullscreen webvr modus
+// Rx.DOM.mousedown(document)
+//   .flatMap(() => interval$.takeUntil(Rx.DOM.mouseup(document)).takeUntil(Rx.DOM.touchend(renderer.domElement))),
+_rx2.default.Observable.fromEvent(document, 'keydown').filter(function (e) {
   return e.keyCode === 32;
 }).flatMap(function (x) {
   return interval$.takeUntil(_rx2.default.Observable.fromEvent(document, 'keyup').filter(function (e) {
@@ -16806,7 +16869,7 @@ var starMaterial = new _three2.default.MeshBasicMaterial({
   color: 0xf1f1f1
 });
 
-var STARSAMOUNT_INITIAL = 500;
+var STARSAMOUNT_INITIAL = 50;
 
 var addStars$ = (0, _tools.createGui)('stars', STARSAMOUNT_INITIAL, 0, 1000, 50).debounce(1000).map(function (starsAmount) {
   return parseInt(starsAmount, 10);
@@ -16901,10 +16964,10 @@ var preload$ = _rx2.default.Observable.combineLatest(_actors.spaceshipMesh$, _rx
   return { spaceshipMesh: spaceshipMesh };
 });
 
-var light = new _three2.default.AmbientLight(0xffffff); // soft white light
+var light = new _three2.default.AmbientLight(0x111111);
 _tools.scene.add(light);
 
-var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils.aspectRatio$, _tools.effectRenderer$, _tools.controls$, _actors.stars$, _actors.shots$, _actors.enemies$, _tools.stats$, _tools.rendererStats$, function (animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats) {
+var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils.aspectRatio$, _tools.effectRenderer$, _tools.controls$, _actors.stars$, _actors.shots$, _actors.enemies$, _tools.stats$, _tools.rendererStats$, _actors.earth$, function (animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth) {
   return {
     animationFrame: animationFrame,
     aspectRatio: aspectRatio,
@@ -16914,7 +16977,8 @@ var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils
     shots: shots,
     enemies: enemies,
     stats: stats,
-    rendererStats: rendererStats
+    rendererStats: rendererStats,
+    earth: earth
   };
 })
 //only update when frame is ready to render
@@ -16938,6 +17002,9 @@ function render(_ref4) {
   var enemies = _ref4.enemies;
   var stats = _ref4.stats;
   var rendererStats = _ref4.rendererStats;
+  var earth = _ref4.earth;
+
+  earth.rotation.x += (0, _utils.getRad)(1) * animationFrame.delta;
 
   //stars
   stars.forEach(function (star, index) {
@@ -16988,7 +17055,7 @@ function render(_ref4) {
   enemies.forEach(function (enemy) {
     enemy.translateZ(50 * animationFrame.delta);
 
-    if (enemy.position.z < -500) {
+    if (enemy.position.z > 500) {
       (0, _actors.removeEnemy)(enemy);
     }
   });
@@ -17193,7 +17260,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var perspective = 75;
 var aspect = (0, _utils.getAspectRatio)(_renderer.renderer.domElement);
 var near = 0.01;
-var far = 1000;
+var far = 20000;
 
 var camera = new _three2.default.PerspectiveCamera(perspective, aspect, near, far);
 camera.position.set(0, 0, 0);
@@ -17304,6 +17371,8 @@ var _screen = require('../utils/screen');
 
 var _webrtc = require('../utils/webrtc');
 
+var _planets = require('../actors/planets');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var gameElement = document.getElementsByTagName('game')[0];
@@ -17315,6 +17384,7 @@ var renderer = exports.renderer = new _three2.default.WebGLRenderer({
 });
 renderer.setPixelRatio(window.devicePixelRatio || 1);
 // renderer.setClearColor( 0x000000, 1);
+renderer.shadowMap.enabled = true;
 
 var stereoEffect = new _three2.default.StereoEffect(renderer);
 var vrEffect = new _three2.default.VREffect(renderer);
@@ -17405,6 +17475,7 @@ _webrtc.webRtcVideo$.take(1).subscribe(function () {
 
 enableWebRtc$.subscribe(function (enableWebRtc) {
   enableWebRtc && (0, _screen.fullscreen)(gameElement);
+  (0, _planets.enableStarField)(!enableWebRtc);
 });
 
 // toggle webrtc stereo render
@@ -17441,7 +17512,7 @@ function removeFocus() {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../utils/screen":36,"../utils/webrtc":38,"rx":16}],32:[function(require,module,exports){
+},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../actors/planets":21,"../utils/screen":36,"../utils/webrtc":38,"rx":16}],32:[function(require,module,exports){
 (function (global){
 'use strict';
 
