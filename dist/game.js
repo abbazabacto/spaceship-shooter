@@ -17004,7 +17004,7 @@ function render(_ref4) {
   var rendererStats = _ref4.rendererStats;
   var earth = _ref4.earth;
 
-  earth.rotation.x += (0, _utils.getRad)(1) * animationFrame.delta;
+  earth.rotation.x += (0, _utils.getRad)(0.3) * animationFrame.delta;
 
   //stars
   stars.forEach(function (star, index) {
