@@ -16535,7 +16535,7 @@ containerEarth.rotation.z = (0, _misc.getRad)(90);
 _scene.scene.add(containerEarth);
 
 var moonMesh = _threex2.default.Planets.createMoon(3000);
-moonMesh.position.set(6000, 0, 0);
+moonMesh.position.set(8000, 0, 0);
 moonMesh.scale.multiplyScalar(1 / 5);
 moonMesh.receiveShadow = true;
 moonMesh.castShadow = true;
@@ -17004,7 +17004,7 @@ function render(_ref4) {
   var rendererStats = _ref4.rendererStats;
   var earth = _ref4.earth;
 
-  earth.rotation.x += (0, _utils.getRad)(1) * animationFrame.delta;
+  earth.rotation.x += (0, _utils.getRad)(0.3) * animationFrame.delta;
 
   //stars
   stars.forEach(function (star, index) {
