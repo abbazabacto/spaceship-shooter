@@ -10,7 +10,7 @@ const starMaterial = new THREE.MeshBasicMaterial({
   color: 0xf1f1f1
 });
 
-const STARSAMOUNT_INITIAL = 500;
+const STARSAMOUNT_INITIAL = 50;
 
 const addStars$ = createGui('stars', STARSAMOUNT_INITIAL, 0, 1000, 50)
   .debounce(1000)
