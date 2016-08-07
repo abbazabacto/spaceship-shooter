@@ -18,7 +18,7 @@ stats$.subscribe(({ dom: domElement }) => {
 rendererStats$.subscribe(({ domElement }) => {
   domElement.style.position = 'absolute';
   domElement.style.top = 'auto';
-  domElement.style.left = 0;;
+  domElement.style.left = 0;
   domElement.style.bottom  = 0;
   document.body.appendChild(domElement);
 });
