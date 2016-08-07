@@ -42,6 +42,7 @@ gulp.task('serve', ['watch'], function(){
     server: {
       baseDir: root
     },
+    https: true,
     ghostMode: false,
   });
 });
