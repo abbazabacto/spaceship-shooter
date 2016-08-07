@@ -41,8 +41,8 @@ export function createTextMesh(text, settings, align = 'left') {
     textMesh.position.x = -1 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
   }
   
-  const nullPointer = new THREE.Object3D();
-  nullPointer.add(textMesh);
+  const zeroPointer = new THREE.Object3D();
+  zeroPointer.add(textMesh);
   
-  return nullPointer;
+  return zeroPointer;
 }
