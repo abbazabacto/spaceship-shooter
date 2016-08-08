@@ -107,20 +107,59 @@ webRtcVideo$.take(1).subscribe(() => {
 
 enableWebRtc$.subscribe(enableWebRtc => {
   enableWebRtc && fullscreen(gameElement);
-  enableStarField(!enableWebRtc);
 });
 
-// toggle webrtc stereo render
+import { scene } from './scene';
+
+let plane;
+
 Rx.Observable.combineLatest(
-  rendererStereoEffect$,
+  effectRenderer$,
   enableWebRtc$.flatMapLatest(enableWebRtc =>
     enableWebRtc ? webRtcVideo$ : Rx.Observable.of(undefined)
   ),
-  (rendererStereoEffect, webRtcVideo) => ({ rendererStereoEffect, webRtcVideo })
+  (effectRenderer, webRtcVideo) => ({ effectRenderer, webRtcVideo })
 )
-.filter(({ webRtcVideo }) => !!webRtcVideo)
-.subscribe(({ rendererStereoEffect, webRtcVideo }) => {
-  webRtcVideo(rendererStereoEffect);
+.subscribe(({ effectRenderer, webRtcVideo }) => {
+  enableStarField(!webRtcVideo);
+
+  if (webRtcVideo) {
+    const videoTexture = new THREE.Texture(webRtcVideo);
+    const material   = new THREE.MeshLambertMaterial({
+      map : videoTexture,
+      // side: THREE.DoubleSide
+    });
+    
+    videoTexture.minFilter = THREE.LinearFilter;
+
+  
+    var geometry = new THREE.PlaneGeometry(40000, 40000, 32);
+    // var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+    plane = new THREE.Mesh(geometry, material);
+    plane.position.z = -19000;
+
+    const zeroPointer = new THREE.Object3D();
+    zeroPointer.add(plane);
+    scene.add(zeroPointer);
+
+    // patch renderer to update video texture
+    effectRenderer._render = effectRenderer.render;
+    effectRenderer.render = function(scene, camera) {
+      zeroPointer.rotation.x = camera.rotation.x;
+      zeroPointer.rotation.y = camera.rotation.y;
+      zeroPointer.rotation.z = camera.rotation.z;
+
+      if( webRtcVideo.readyState === webRtcVideo.HAVE_ENOUGH_DATA ){
+        videoTexture.needsUpdate = true;
+      }
+      effectRenderer._render.apply(this, arguments);
+    }
+  } else {
+    scene.remove(plane);
+    // unpatch
+    effectRenderer.render = effectRenderer._render;
+    delete effectRenderer._render;
+  }
 });
 
 function toggleButton(button, initState) {
