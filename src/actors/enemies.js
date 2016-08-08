@@ -1,10 +1,10 @@
 import THREE from 'three';
 import Rx from 'rx';
 
-import { camera, scene } from '../tools';
+import { camera, scene, addRenderer, removeRenderer } from '../tools';
 import { level$ } from './score';
 import { spaceshipMesh$ } from './spaceship';
-import { randomFromRange } from '../utils';
+import { randomFromRange, getVideoMaterial$ } from '../utils';
 
 const enemyGeometry = new THREE.BoxGeometry(10, 10, 10);
 const enemyMaterialHithox = new THREE.MeshBasicMaterial({
@@ -28,8 +28,7 @@ export const enemies$ = Rx.Observable
   .merge(
     addEnemy$.map(function (index) {
       const enemy = new THREE.Mesh(enemyGeometry, enemyMaterialHithox);
-      //const enemy = new THREE.Object3D();
-      
+
       spaceshipMesh$.subscribe(function (spaceshipMesh) {
         enemy.add(spaceshipMesh.clone());
       });
@@ -54,7 +53,36 @@ export const enemies$ = Rx.Observable
   .scan((enemies, operation) => operation(enemies), [])
   .startWith([]);
 
-//export const removeEnemy = RemoveEnemy.onNext;
-export function removeEnemy(enemy){
-  removeEnemy$.onNext(enemy);
-}
+export const removeEnemy = (enemy) => removeEnemy$.onNext(enemy);
+
+export const addExplosion = (enemy) => {
+  let plane;
+  let _renderMaterial;
+  const { position, rotation } = enemy;
+
+  getVideoMaterial$('/res/video/explosion/explosion.webm')
+    .do((renderMaterial) => _renderMaterial = renderMaterial)
+    .subscribe((renderMaterial) => {
+      const geometry = new THREE.PlaneGeometry(20, 20, 32);
+      plane = new THREE.Mesh(geometry, renderMaterial());
+
+      plane.position.x = position.x;
+      plane.position.y = position.y;
+      plane.position.z = position.z;
+      plane.rotation.x = rotation.x;
+      plane.rotation.y = rotation.y;
+      plane.rotation.z = rotation.z;
+
+      scene.add(plane);
+
+      addRenderer(renderMaterial);
+    }, 
+    () => {}, 
+    () => {
+      scene.remove(plane);
+      removeRenderer(_renderMaterial);
+
+      plane = null;
+      _renderMaterial = null;
+    });
+};

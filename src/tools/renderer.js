@@ -137,3 +137,18 @@ const buttonHolder = buttons[0].parentElement;
 function removeFocus() {
   buttonHolder.focus();
 }
+
+const addRenderer$ = new Rx.ReplaySubject(1);
+const removeRenderer$ = new Rx.ReplaySubject(1);
+
+export const renderers$ = Rx.Observable.merge(
+  addRenderer$
+    .map(renderer => (renderers) => renderers.concat([renderer])),
+  removeRenderer$
+    .map(renderer => (renderers) => renderers.filter(r => !renderer))
+)
+.scan((renderers, operation) => operation(renderers), [])
+.startWith([]);
+
+export const addRenderer = (renderer) => addRenderer$.onNext(renderer);
+export const removeRenderer = renderer => removeRenderer$.onNext(renderer);
