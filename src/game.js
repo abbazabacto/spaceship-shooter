@@ -2,9 +2,9 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { scene, camera, renderer, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
+import { scene, camera, renderer, renderers$, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
 import { aspectRatio$, getRad } from './utils';
-import { stars$, removeShot, shots$, removeEnemy, enemies$, addScore, spaceshipMesh$, earth$ } from './actors';
+import { stars$, removeShot, shots$, removeEnemy, enemies$, addExplosion, addScore, spaceshipMesh$, earth$ } from './actors';
 
 stats$.subscribe(({ dom: domElement }) => {
   domElement.style.position = 'absolute';
@@ -47,8 +47,8 @@ scene.add( light );
 
 const game$ = Rx.Observable
   .combineLatest(
-   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, stats$, rendererStats$, earth$, 
-    function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth){
+   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, stats$, rendererStats$, earth$, renderers$, 
+    function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth, renderers){
       return { 
         animationFrame,
         aspectRatio,
@@ -60,6 +60,7 @@ const game$ = Rx.Observable
         stats,
         rendererStats,
         earth,
+        renderers
       };  
     }
   )
@@ -71,7 +72,9 @@ preload$
   .flatMap(() => game$) 
   .subscribe(render);
 
-function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth }){
+function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth, renderers }){
+  renderers.forEach(render => render(scene, camera, animationFrame.delta));
+
   earth.rotation.x += getRad(0.3) * animationFrame.delta;
 
   //stars
@@ -114,6 +117,7 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, 
         shot.hit = true;
         removeShot(shot);
         removeEnemy(collisionResult[0].object);
+        addExplosion(collisionResult[0].object);
         addScore(1, shot.index);
       }
     });
