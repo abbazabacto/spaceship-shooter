@@ -3,7 +3,7 @@ import Rx from 'rx';
 const createVideo = (mediaStream) => {
   const video = document.createElement('video');
   if (typeof mediaStream === 'string') {
-    video.src = mediaStream;
+    video.src = document.location.href + mediaStream;
     video.play();
   } else {
     video.srcObject = mediaStream;
