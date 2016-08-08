@@ -16417,8 +16417,7 @@ for (var _key12 in _planets) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.enemies$ = undefined;
-exports.removeEnemy = removeEnemy;
+exports.addExplosion = exports.removeEnemy = exports.enemies$ = undefined;
 
 var _three = (typeof window !== "undefined" ? window['THREE'] : typeof global !== "undefined" ? global['THREE'] : null);
 
@@ -16457,7 +16456,6 @@ var removeEnemy$ = new _rx2.default.Subject();
 
 var enemies$ = exports.enemies$ = _rx2.default.Observable.merge(addEnemy$.map(function (index) {
   var enemy = new _three2.default.Mesh(enemyGeometry, enemyMaterialHithox);
-  //const enemy = new THREE.Object3D();
 
   _spaceship.spaceshipMesh$.subscribe(function (spaceshipMesh) {
     enemy.add(spaceshipMesh.clone());
@@ -16484,10 +16482,40 @@ var enemies$ = exports.enemies$ = _rx2.default.Observable.merge(addEnemy$.map(fu
   return operation(enemies);
 }, []).startWith([]);
 
-//export const removeEnemy = RemoveEnemy.onNext;
-function removeEnemy(enemy) {
-  removeEnemy$.onNext(enemy);
-}
+var removeEnemy = exports.removeEnemy = function removeEnemy(enemy) {
+  return removeEnemy$.onNext(enemy);
+};
+
+var addExplosion = exports.addExplosion = function addExplosion(enemy) {
+  var plane = undefined;
+  var _renderMaterial = undefined;
+  var position = enemy.position;
+  var rotation = enemy.rotation;
+
+  (0, _utils.getVideoMaterial$)('/res/video/explosion/explosion.webm').do(function (renderMaterial) {
+    return _renderMaterial = renderMaterial;
+  }).subscribe(function (renderMaterial) {
+    var geometry = new _three2.default.PlaneGeometry(20, 20, 32);
+    plane = new _three2.default.Mesh(geometry, renderMaterial());
+
+    plane.position.x = position.x;
+    plane.position.y = position.y;
+    plane.position.z = position.z;
+    plane.rotation.x = rotation.x;
+    plane.rotation.y = rotation.y;
+    plane.rotation.z = rotation.z;
+
+    _tools.scene.add(plane);
+
+    (0, _tools.addRenderer)(renderMaterial);
+  }, function () {}, function () {
+    _tools.scene.remove(plane);
+    (0, _tools.removeRenderer)(_renderMaterial);
+
+    plane = null;
+    _renderMaterial = null;
+  });
+};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
@@ -16818,18 +16846,15 @@ var _rx2 = _interopRequireDefault(_rx);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var spaceshipGeometry$ = new _rx2.default.ReplaySubject(1);
-var spaceShipMaterial = new _three2.default.MeshBasicMaterial({
-  color: 0x333333
-});
+var spaceshipLoad$ = new _rx2.default.ReplaySubject(1);
 
 var loader = new _three2.default.JSONLoader();
 
 loader.load('res/models/spaceship.json', function (geometry, materials) {
-  spaceshipGeometry$.onNext({ geometry: geometry, materials: materials });
+  spaceshipLoad$.onNext({ geometry: geometry, materials: materials });
 });
 
-var spaceshipMesh$ = exports.spaceshipMesh$ = spaceshipGeometry$.map(function (_ref) {
+var spaceshipMesh$ = exports.spaceshipMesh$ = spaceshipLoad$.map(function (_ref) {
   var geometry = _ref.geometry;
   var materials = _ref.materials;
 
@@ -16944,7 +16969,7 @@ _tools.rendererStats$.subscribe(function (_ref2) {
 
   domElement.style.position = 'absolute';
   domElement.style.top = 'auto';
-  domElement.style.left = 0;;
+  domElement.style.left = 0;
   domElement.style.bottom = 0;
   document.body.appendChild(domElement);
 });
@@ -16969,7 +16994,7 @@ var preload$ = _rx2.default.Observable.combineLatest(_actors.spaceshipMesh$, _rx
 var light = new _three2.default.AmbientLight(0x111111);
 _tools.scene.add(light);
 
-var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils.aspectRatio$, _tools.effectRenderer$, _tools.controls$, _actors.stars$, _actors.shots$, _actors.enemies$, _tools.stats$, _tools.rendererStats$, _actors.earth$, function (animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth) {
+var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils.aspectRatio$, _tools.effectRenderer$, _tools.controls$, _actors.stars$, _actors.shots$, _actors.enemies$, _tools.stats$, _tools.rendererStats$, _actors.earth$, _tools.renderers$, function (animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth, renderers) {
   return {
     animationFrame: animationFrame,
     aspectRatio: aspectRatio,
@@ -16980,7 +17005,8 @@ var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils
     enemies: enemies,
     stats: stats,
     rendererStats: rendererStats,
-    earth: earth
+    earth: earth,
+    renderers: renderers
   };
 })
 //only update when frame is ready to render
@@ -17005,6 +17031,11 @@ function render(_ref4) {
   var stats = _ref4.stats;
   var rendererStats = _ref4.rendererStats;
   var earth = _ref4.earth;
+  var renderers = _ref4.renderers;
+
+  renderers.forEach(function (render) {
+    return render(_tools.scene, _tools.camera, animationFrame.delta);
+  });
 
   earth.rotation.x += (0, _utils.getRad)(0.3) * animationFrame.delta;
 
@@ -17048,6 +17079,7 @@ function render(_ref4) {
         shot.hit = true;
         (0, _actors.removeShot)(shot);
         (0, _actors.removeEnemy)(collisionResult[0].object);
+        (0, _actors.addExplosion)(collisionResult[0].object);
         (0, _actors.addScore)(1, shot.index);
       }
     });
@@ -17350,7 +17382,7 @@ var controls$ = exports.controls$ = _rx2.default.Observable.merge(orbitControls$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.effectRenderer$ = exports.rendererStereoEffect$ = exports.renderer = undefined;
+exports.removeRenderer = exports.addRenderer = exports.renderers$ = exports.effectRenderer$ = exports.rendererStereoEffect$ = exports.renderer = undefined;
 exports.setRenderEffect = setRenderEffect;
 
 var _three = (typeof window !== "undefined" ? window['THREE'] : typeof global !== "undefined" ? global['THREE'] : null);
@@ -17374,6 +17406,8 @@ var _screen = require('../utils/screen');
 var _webrtc = require('../utils/webrtc');
 
 var _planets = require('../actors/planets');
+
+var _scene = require('./scene');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17477,22 +17511,61 @@ _webrtc.webRtcVideo$.take(1).subscribe(function () {
 
 enableWebRtc$.subscribe(function (enableWebRtc) {
   enableWebRtc && (0, _screen.fullscreen)(gameElement);
-  (0, _planets.enableStarField)(!enableWebRtc);
 });
 
-// toggle webrtc stereo render
-_rx2.default.Observable.combineLatest(rendererStereoEffect$, enableWebRtc$.flatMapLatest(function (enableWebRtc) {
-  return enableWebRtc ? _webrtc.webRtcVideo$ : _rx2.default.Observable.of(undefined);
-}), function (rendererStereoEffect, webRtcVideo) {
-  return { rendererStereoEffect: rendererStereoEffect, webRtcVideo: webRtcVideo };
-}).filter(function (_ref2) {
-  var webRtcVideo = _ref2.webRtcVideo;
-  return !!webRtcVideo;
-}).subscribe(function (_ref3) {
-  var rendererStereoEffect = _ref3.rendererStereoEffect;
-  var webRtcVideo = _ref3.webRtcVideo;
+var plane = undefined;
 
-  webRtcVideo(rendererStereoEffect);
+_rx2.default.Observable.combineLatest(effectRenderer$, enableWebRtc$.flatMapLatest(function (enableWebRtc) {
+  return enableWebRtc ? _webrtc.webRtcVideo$ : _rx2.default.Observable.of(undefined);
+}), function (effectRenderer, webRtcVideo) {
+  return { effectRenderer: effectRenderer, webRtcVideo: webRtcVideo };
+}).subscribe(function (_ref2) {
+  var effectRenderer = _ref2.effectRenderer;
+  var webRtcVideo = _ref2.webRtcVideo;
+
+  (0, _planets.enableStarField)(!webRtcVideo);
+
+  if (webRtcVideo) {
+    var geometry;
+
+    (function () {
+      var videoTexture = new _three2.default.Texture(webRtcVideo);
+      var material = new _three2.default.MeshLambertMaterial({
+        map: videoTexture
+      });
+
+      // side: THREE.DoubleSide
+      videoTexture.minFilter = _three2.default.LinearFilter;
+
+      geometry = new _three2.default.PlaneGeometry(40000, 40000, 32);
+      // var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+
+      plane = new _three2.default.Mesh(geometry, material);
+      plane.position.z = -19000;
+
+      var zeroPointer = new _three2.default.Object3D();
+      zeroPointer.add(plane);
+      _scene.scene.add(zeroPointer);
+
+      // patch renderer to update video texture
+      effectRenderer._render = effectRenderer.render;
+      effectRenderer.render = function (scene, camera) {
+        zeroPointer.rotation.x = camera.rotation.x;
+        zeroPointer.rotation.y = camera.rotation.y;
+        zeroPointer.rotation.z = camera.rotation.z;
+
+        if (webRtcVideo.readyState === webRtcVideo.HAVE_ENOUGH_DATA) {
+          videoTexture.needsUpdate = true;
+        }
+        effectRenderer._render.apply(this, arguments);
+      };
+    })();
+  } else {
+    _scene.scene.remove(plane);
+    // unpatch
+    effectRenderer.render = effectRenderer._render;
+    delete effectRenderer._render;
+  }
 });
 
 function toggleButton(button, initState) {
@@ -17512,9 +17585,33 @@ function removeFocus() {
   buttonHolder.focus();
 }
 
+var addRenderer$ = new _rx2.default.ReplaySubject(1);
+var removeRenderer$ = new _rx2.default.ReplaySubject(1);
+
+var renderers$ = exports.renderers$ = _rx2.default.Observable.merge(addRenderer$.map(function (renderer) {
+  return function (renderers) {
+    return renderers.concat([renderer]);
+  };
+}), removeRenderer$.map(function (renderer) {
+  return function (renderers) {
+    return renderers.filter(function (r) {
+      return !renderer;
+    });
+  };
+})).scan(function (renderers, operation) {
+  return operation(renderers);
+}, []).startWith([]);
+
+var addRenderer = exports.addRenderer = function addRenderer(renderer) {
+  return addRenderer$.onNext(renderer);
+};
+var removeRenderer = exports.removeRenderer = function removeRenderer(renderer) {
+  return removeRenderer$.onNext(renderer);
+};
+
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../actors/planets":21,"../utils/screen":36,"../utils/webrtc":38,"rx":16}],32:[function(require,module,exports){
+},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../actors/planets":21,"../utils/screen":36,"../utils/webrtc":39,"./scene":32,"rx":16}],32:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -17614,77 +17711,95 @@ Object.defineProperty(exports, "__esModule", {
 
 var _misc = require('./utils/misc');
 
-var _loop = function _loop(_key5) {
-  if (_key5 === "default") return 'continue';
-  Object.defineProperty(exports, _key5, {
+var _loop = function _loop(_key6) {
+  if (_key6 === "default") return 'continue';
+  Object.defineProperty(exports, _key6, {
     enumerable: true,
     get: function get() {
-      return _misc[_key5];
+      return _misc[_key6];
     }
   });
 };
 
-for (var _key5 in _misc) {
-  var _ret = _loop(_key5);
+for (var _key6 in _misc) {
+  var _ret = _loop(_key6);
 
   if (_ret === 'continue') continue;
 }
 
 var _text = require('./utils/text');
 
-var _loop2 = function _loop2(_key6) {
-  if (_key6 === "default") return 'continue';
-  Object.defineProperty(exports, _key6, {
+var _loop2 = function _loop2(_key7) {
+  if (_key7 === "default") return 'continue';
+  Object.defineProperty(exports, _key7, {
     enumerable: true,
     get: function get() {
-      return _text[_key6];
+      return _text[_key7];
     }
   });
 };
 
-for (var _key6 in _text) {
-  var _ret2 = _loop2(_key6);
+for (var _key7 in _text) {
+  var _ret2 = _loop2(_key7);
 
   if (_ret2 === 'continue') continue;
 }
 
 var _screen = require('./utils/screen');
 
-var _loop3 = function _loop3(_key7) {
-  if (_key7 === "default") return 'continue';
-  Object.defineProperty(exports, _key7, {
-    enumerable: true,
-    get: function get() {
-      return _screen[_key7];
-    }
-  });
-};
-
-for (var _key7 in _screen) {
-  var _ret3 = _loop3(_key7);
-
-  if (_ret3 === 'continue') continue;
-}
-
-var _webrtc = require('./utils/webrtc');
-
-var _loop4 = function _loop4(_key8) {
+var _loop3 = function _loop3(_key8) {
   if (_key8 === "default") return 'continue';
   Object.defineProperty(exports, _key8, {
     enumerable: true,
     get: function get() {
-      return _webrtc[_key8];
+      return _screen[_key8];
     }
   });
 };
 
-for (var _key8 in _webrtc) {
-  var _ret4 = _loop4(_key8);
+for (var _key8 in _screen) {
+  var _ret3 = _loop3(_key8);
+
+  if (_ret3 === 'continue') continue;
+}
+
+var _video = require('./utils/video');
+
+var _loop4 = function _loop4(_key9) {
+  if (_key9 === "default") return 'continue';
+  Object.defineProperty(exports, _key9, {
+    enumerable: true,
+    get: function get() {
+      return _video[_key9];
+    }
+  });
+};
+
+for (var _key9 in _video) {
+  var _ret4 = _loop4(_key9);
 
   if (_ret4 === 'continue') continue;
 }
 
-},{"./utils/misc":35,"./utils/screen":36,"./utils/text":37,"./utils/webrtc":38}],35:[function(require,module,exports){
+var _webrtc = require('./utils/webrtc');
+
+var _loop5 = function _loop5(_key10) {
+  if (_key10 === "default") return 'continue';
+  Object.defineProperty(exports, _key10, {
+    enumerable: true,
+    get: function get() {
+      return _webrtc[_key10];
+    }
+  });
+};
+
+for (var _key10 in _webrtc) {
+  var _ret5 = _loop5(_key10);
+
+  if (_ret5 === 'continue') continue;
+}
+
+},{"./utils/misc":35,"./utils/screen":36,"./utils/text":37,"./utils/video":38,"./utils/webrtc":39}],35:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17841,15 +17956,72 @@ function createTextMesh(text, settings) {
     textMesh.position.x = -1 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
   }
 
-  var nullPointer = new _three2.default.Object3D();
-  nullPointer.add(textMesh);
+  var zeroPointer = new _three2.default.Object3D();
+  zeroPointer.add(textMesh);
 
-  return nullPointer;
+  return zeroPointer;
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
 },{"../../lib/text/FontUtils":10,"../../lib/text/GeometryUtils":11,"../../lib/text/TextGeometry":12,"../../res/fonts/helvetiker_bold.typeface":17,"../../res/fonts/helvetiker_regular.typeface":18}],38:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getVideoMaterial$ = undefined;
+
+var _rx = require('rx');
+
+var _rx2 = _interopRequireDefault(_rx);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var createVideo = function createVideo(mediaStream) {
+  var video = document.createElement('video');
+  if (typeof mediaStream === 'string') {
+    video.src = mediaStream;
+    video.play();
+  } else {
+    video.srcObject = mediaStream;
+  }
+
+  return video;
+};
+
+// getVideoMaterialRenderer$
+var getVideoMaterial$ = exports.getVideoMaterial$ = function getVideoMaterial$(mediaStream) {
+  return _rx2.default.Observable.create(function (observer) {
+    var video = createVideo(mediaStream);
+    var videoTexture = new THREE.Texture(video);
+    var material = new THREE.MeshLambertMaterial({ map: videoTexture });
+
+    videoTexture.minFilter = THREE.LinearFilter;
+
+    observer.next(function () {
+      if (video && video.ended) {
+        observer.completed();
+      }
+
+      if (video && video.readyState === video.HAVE_ENOUGH_DATA) {
+        videoTexture.needsUpdate = true;
+      }
+
+      return material;
+    });
+
+    return function () {
+      video.pause();
+
+      video = null;
+      videoTexture = null;
+      material = null;
+    };
+  });
+};
+
+},{"rx":16}],39:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17896,88 +18068,19 @@ var gameElement = document.getElementsByTagName('game')[0];
 
 var webRtcVideo$ = exports.webRtcVideo$ = mediaStream$.flatMap(function (mediaStream) {
   return _rx2.default.Observable.create(function (observer) {
-    var videoHolder = document.createElement('video-holder');
-    positionElement(videoHolder);
-
     var video = document.createElement('video');
-    positionElement(video);
     video.srcObject = mediaStream;
 
-    videoHolder.appendChild(video);
-    gameElement.insertBefore(videoHolder, gameElement.children[0]);
-
-    var videoStereoHolder = undefined;
-    var videoStereo = undefined;
-
-    observer.next(function (enableWebRtcStereo) {
-      if (enableWebRtcStereo) {
-        videoStereoHolder = document.createElement('video-holder');
-        positionElement(videoHolder);
-
-        videoStereo = document.createElement('video');
-        positionElement(videoStereo);
-        videoStereo.src = video.src;
-
-        positionElement(videoHolder, 'left');
-        positionElement(video, 'left');
-        positionElement(videoStereoHolder, 'right');
-        positionElement(videoStereo, 'right');
-
-        videoStereoHolder.appendChild(videoStereo);
-        gameElement.insertBefore(videoStereoHolder, gameElement.children[0]);
-      } else {
-        // videoStereoHolder && gameElement.remove(videoStereoHolder);
-        positionElement(video);
-        positionElement(videoHolder);
-      }
-
-      return enableWebRtcStereo;
-    });
+    observer.next(video);
 
     return function () {
-      gameElement.removeChild(videoHolder);
-      videoStereoHolder && gameElement.removeChild(videoStereoHolder);
       mediaStream.getVideoTracks().forEach(function (videoTrack) {
         return videoTrack.stop();
       });
+      video = null;
     };
   });
 });
-
-var stereoDeviation = '4vw';
-
-function positionElement(element, eye) {
-  var isVideo = element.tagName.toLowerCase() === 'video';
-
-  element.style.position = 'absolute';
-  element.style.left = '50%';
-  element.style.top = '50%';
-  element.style.minHeight = '100vh';
-  element.style.marginLeft = '';
-  element.style.marginRight = '';
-  element.style.minWidth = '100vw';
-  element.style.transform = 'translateX(-50%) translateY(-50%)';
-
-  if (eye) {
-    if (isVideo) {
-      if (eye === 'left') {
-        element.style.transform = 'translateX(-50%) translateY(-50%) translateX(-' + stereoDeviation + ')';
-      } else {
-        element.style.transform = 'translateX(-50%) translateY(-50%) translateX(' + stereoDeviation + ')';
-      }
-    } else {
-      element.style.minWidth = '50vw';
-      element.style.transform = 'translateY(-50%)';
-
-      if (eye === 'left') {
-        element.style.left = '0';
-      } else {
-        element.style.left = '';
-        element.style.right = '0';
-      }
-    }
-  }
-}
 
 },{"rx":16}]},{},[26])
 
