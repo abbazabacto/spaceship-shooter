@@ -16492,7 +16492,7 @@ var addExplosion = exports.addExplosion = function addExplosion(enemy) {
   var position = enemy.position;
   var rotation = enemy.rotation;
 
-  (0, _utils.getVideoMaterial$)('/res/video/explosion/explosion.webm').do(function (renderMaterial) {
+  (0, _utils.getVideoMaterial$)('res/video/explosion/explosion.webm').do(function (renderMaterial) {
     return _renderMaterial = renderMaterial;
   }).subscribe(function (renderMaterial) {
     var geometry = new _three2.default.PlaneGeometry(20, 20, 32);
