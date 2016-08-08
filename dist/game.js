@@ -17981,7 +17981,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var createVideo = function createVideo(mediaStream) {
   var video = document.createElement('video');
   if (typeof mediaStream === 'string') {
-    video.src = mediaStream;
+    video.src = document.location.href + mediaStream;
     video.play();
   } else {
     video.srcObject = mediaStream;
