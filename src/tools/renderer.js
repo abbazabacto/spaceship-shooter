@@ -184,7 +184,7 @@ export const renderers$ = Rx.Observable.merge(
   addRenderer$
     .map(renderer => (renderers) => renderers.concat([renderer])),
   removeRenderer$
-    .map(renderer => (renderers) => renderers.filter(r => !renderer))
+    .map(renderer => (renderers) => renderers.filter(r => r !== renderer))
 )
 .scan((renderers, operation) => operation(renderers), [])
 .startWith([]);
