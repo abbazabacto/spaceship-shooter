@@ -16374,19 +16374,19 @@ for (var _key10 in _spaceship) {
   if (_ret4 === 'continue') continue;
 }
 
-var _stars = require('./actors/stars');
+var _asteroids = require('./actors/asteroids');
 
 var _loop5 = function _loop5(_key11) {
   if (_key11 === "default") return 'continue';
   Object.defineProperty(exports, _key11, {
     enumerable: true,
     get: function get() {
-      return _stars[_key11];
+      return _asteroids[_key11];
     }
   });
 };
 
-for (var _key11 in _stars) {
+for (var _key11 in _asteroids) {
   var _ret5 = _loop5(_key11);
 
   if (_ret5 === 'continue') continue;
@@ -16410,7 +16410,70 @@ for (var _key12 in _planets) {
   if (_ret6 === 'continue') continue;
 }
 
-},{"./actors/enemies":20,"./actors/planets":21,"./actors/score":22,"./actors/shots":23,"./actors/spaceship":24,"./actors/stars":25}],20:[function(require,module,exports){
+},{"./actors/asteroids":20,"./actors/enemies":21,"./actors/planets":22,"./actors/score":23,"./actors/shots":24,"./actors/spaceship":25}],20:[function(require,module,exports){
+(function (global){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.asteroids$ = undefined;
+
+var _three = (typeof window !== "undefined" ? window['THREE'] : typeof global !== "undefined" ? global['THREE'] : null);
+
+var _three2 = _interopRequireDefault(_three);
+
+var _rx = require('rx');
+
+var _rx2 = _interopRequireDefault(_rx);
+
+var _tools = require('../tools');
+
+var _utils = require('../utils');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var asteroidGeometries = [createAsteroidGeometry(1), createAsteroidGeometry(0.25), createAsteroidGeometry(0.5)];
+var asteroidMaterial = new _three2.default.MeshBasicMaterial({
+  color: 0xf1f1f1
+});
+
+var ASTEROID_AMOUNT_INITIAL = 50;
+
+var addAsteroids$ = (0, _tools.createGui)('asteroids', ASTEROID_AMOUNT_INITIAL, 0, 1000, 50).debounce(1000).map(function (asteroidAmount) {
+  return parseInt(asteroidAmount, 10);
+}).startWith(ASTEROID_AMOUNT_INITIAL).flatMap(function (asteroidsAmount) {
+  return _rx2.default.Observable.of((0, _utils.range)(0, asteroidsAmount).map(function () {
+    var asteroid = new _three2.default.Mesh(asteroidGeometries[Math.floor(Math.random() * asteroidGeometries.length)], asteroidMaterial);
+    asteroid.position.x = (0, _utils.randomFromRange)(-500, 500);
+    asteroid.position.y = (0, _utils.randomFromRange)(-500, 500);
+    asteroid.position.z = (0, _utils.randomFromRange)(-500, 500);
+    return asteroid;
+  }));
+});
+
+var asteroids$ = exports.asteroids$ = addAsteroids$.scan(function () {
+  var oldAsteroids = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+  var newAsteroids = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+
+  oldAsteroids.map(function (asteroid) {
+    _tools.scene.remove(asteroid);
+  });
+  return newAsteroids.map(function (asteroid) {
+    _tools.scene.add(asteroid);
+    return asteroid;
+  });
+}, []).startWith([]);
+
+function createAsteroidGeometry(size) {
+  var fraction = arguments.length <= 1 || arguments[1] === undefined ? 8 : arguments[1];
+
+  return new _three2.default.SphereGeometry(size, fraction, fraction);
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+
+},{"../tools":27,"../utils":34,"rx":16}],21:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -16519,7 +16582,7 @@ var addExplosion = exports.addExplosion = function addExplosion(enemy) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../tools":27,"../utils":34,"./score":22,"./spaceship":24,"rx":16}],21:[function(require,module,exports){
+},{"../tools":27,"../utils":34,"./score":23,"./spaceship":25,"rx":16}],22:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -16627,7 +16690,7 @@ var enableStarField = exports.enableStarField = function enableStarField(enabled
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../../lib/planets/threex.atmospherematerial":6,"../../lib/planets/threex.planets":7,"../tools/scene":32,"../utils/misc":35,"rx":16}],22:[function(require,module,exports){
+},{"../../lib/planets/threex.atmospherematerial":6,"../../lib/planets/threex.planets":7,"../tools/scene":32,"../utils/misc":35,"rx":16}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -16738,7 +16801,7 @@ _rx2.default.Observable.combineLatest(_utils.aspectRatio$, _tools.rendererStereo
   scoreHolder.position.x = 90 * aspectRatio;
 });
 
-},{"../tools":27,"../utils":34,"rx":16}],23:[function(require,module,exports){
+},{"../tools":27,"../utils":34,"rx":16}],24:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -16827,7 +16890,7 @@ function removeShot(shot) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../tools":27,"rx":16,"rx-dom":15}],24:[function(require,module,exports){
+},{"../tools":27,"rx":16,"rx-dom":15}],25:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -16867,71 +16930,7 @@ var spaceshipMesh$ = exports.spaceshipMesh$ = spaceshipLoad$.map(function (_ref)
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"rx":16}],25:[function(require,module,exports){
-(function (global){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.stars$ = undefined;
-
-var _three = (typeof window !== "undefined" ? window['THREE'] : typeof global !== "undefined" ? global['THREE'] : null);
-
-var _three2 = _interopRequireDefault(_three);
-
-var _rx = require('rx');
-
-var _rx2 = _interopRequireDefault(_rx);
-
-var _tools = require('../tools');
-
-var _utils = require('../utils');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// const starGeometries = [createStarGeometry(0.25)];
-var starGeometries = [createStarGeometry(1), createStarGeometry(0.25), createStarGeometry(0.5)];
-var starMaterial = new _three2.default.MeshBasicMaterial({
-  color: 0xf1f1f1
-});
-
-var STARSAMOUNT_INITIAL = 50;
-
-var addStars$ = (0, _tools.createGui)('stars', STARSAMOUNT_INITIAL, 0, 1000, 50).debounce(1000).map(function (starsAmount) {
-  return parseInt(starsAmount, 10);
-}).startWith(STARSAMOUNT_INITIAL).flatMap(function (starsAmount) {
-  return _rx2.default.Observable.of((0, _utils.range)(0, starsAmount).map(function (stars) {
-    var star = new _three2.default.Mesh(starGeometries[Math.floor(Math.random() * starGeometries.length)], starMaterial);
-    star.position.x = (0, _utils.randomFromRange)(-500, 500);
-    star.position.y = (0, _utils.randomFromRange)(-500, 500);
-    star.position.z = (0, _utils.randomFromRange)(-500, 500);
-    return star;
-  }));
-});
-
-var stars$ = exports.stars$ = addStars$.scan(function () {
-  var oldStars = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-  var newStars = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
-
-  oldStars.map(function (star) {
-    _tools.scene.remove(star);
-  });
-  return newStars.map(function (star) {
-    _tools.scene.add(star);
-    return star;
-  });
-}, []).startWith([]);
-
-function createStarGeometry(size) {
-  var fraction = arguments.length <= 1 || arguments[1] === undefined ? 8 : arguments[1];
-
-  return new _three2.default.SphereGeometry(size, fraction, fraction);
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-
-},{"../tools":27,"../utils":34,"rx":16}],26:[function(require,module,exports){
+},{"rx":16}],26:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -16994,13 +16993,13 @@ var preload$ = _rx2.default.Observable.combineLatest(_actors.spaceshipMesh$, _rx
 var light = new _three2.default.AmbientLight(0x111111);
 _tools.scene.add(light);
 
-var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils.aspectRatio$, _tools.effectRenderer$, _tools.controls$, _actors.stars$, _actors.shots$, _actors.enemies$, _tools.stats$, _tools.rendererStats$, _actors.earth$, _tools.renderers$, function (animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth, renderers) {
+var game$ = _rx2.default.Observable.combineLatest(_tools.animationFrame$, _utils.aspectRatio$, _tools.effectRenderer$, _tools.controls$, _actors.asteroids$, _actors.shots$, _actors.enemies$, _tools.stats$, _tools.rendererStats$, _actors.earth$, _tools.renderers$, function (animationFrame, aspectRatio, effectRenderer, controls, asteroids, shots, enemies, stats, rendererStats, earth, renderers) {
   return {
     animationFrame: animationFrame,
     aspectRatio: aspectRatio,
     effectRenderer: effectRenderer,
     controls: controls,
-    stars: stars,
+    asteroids: asteroids,
     shots: shots,
     enemies: enemies,
     stats: stats,
@@ -17025,7 +17024,7 @@ function render(_ref4) {
   var aspectRatio = _ref4.aspectRatio;
   var effectRenderer = _ref4.effectRenderer;
   var controls = _ref4.controls;
-  var stars = _ref4.stars;
+  var asteroids = _ref4.asteroids;
   var shots = _ref4.shots;
   var enemies = _ref4.enemies;
   var stats = _ref4.stats;
@@ -17039,18 +17038,18 @@ function render(_ref4) {
 
   earth.rotation.x += (0, _utils.getRad)(0.3) * animationFrame.delta;
 
-  //stars
-  stars.forEach(function (star, index) {
+  //asteroids
+  asteroids.forEach(function (asteroid, index) {
     if (index % 3 === 0) {
-      star.position.z += 10 * animationFrame.delta;
+      asteroid.position.z += 10 * animationFrame.delta;
     } else if (index % 3 === 1) {
-      star.position.z += 20 * animationFrame.delta;
+      asteroid.position.z += 20 * animationFrame.delta;
     } else if (index % 3 === 2) {
-      star.position.z += 50 * animationFrame.delta;
+      asteroid.position.z += 50 * animationFrame.delta;
     }
 
-    if (star.position.z > 500) {
-      star.position.z = -500;
+    if (asteroid.position.z > 500) {
+      asteroid.position.z = -500;
     }
   });
 
@@ -17611,7 +17610,7 @@ var removeRenderer = exports.removeRenderer = function removeRenderer(renderer) 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../actors/planets":21,"../utils/screen":36,"../utils/webrtc":39,"./scene":32,"rx":16}],32:[function(require,module,exports){
+},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../actors/planets":22,"../utils/screen":36,"../utils/webrtc":39,"./scene":32,"rx":16}],32:[function(require,module,exports){
 (function (global){
 'use strict';
 
