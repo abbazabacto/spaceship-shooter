@@ -4,7 +4,7 @@ import 'rx-dom';
 
 import { scene, camera, renderer, renderers$, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
 import { aspectRatio$, getRad } from './utils';
-import { stars$, removeShot, shots$, removeEnemy, enemies$, addExplosion, addScore, spaceshipMesh$, earth$ } from './actors';
+import { asteroids$, removeShot, shots$, removeEnemy, enemies$, addExplosion, addScore, spaceshipMesh$, earth$ } from './actors';
 
 stats$.subscribe(({ dom: domElement }) => {
   domElement.style.position = 'absolute';
@@ -47,14 +47,14 @@ scene.add( light );
 
 const game$ = Rx.Observable
   .combineLatest(
-   animationFrame$, aspectRatio$, effectRenderer$, controls$, stars$, shots$, enemies$, stats$, rendererStats$, earth$, renderers$, 
-    function(animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth, renderers){
+   animationFrame$, aspectRatio$, effectRenderer$, controls$, asteroids$, shots$, enemies$, stats$, rendererStats$, earth$, renderers$, 
+    function(animationFrame, aspectRatio, effectRenderer, controls, asteroids, shots, enemies, stats, rendererStats, earth, renderers){
       return { 
         animationFrame,
         aspectRatio,
         effectRenderer,
         controls,
-        stars,
+        asteroids,
         shots,
         enemies,
         stats,
@@ -72,23 +72,23 @@ preload$
   .flatMap(() => game$) 
   .subscribe(render);
 
-function render({ animationFrame, aspectRatio, effectRenderer, controls, stars, shots, enemies, stats, rendererStats, earth, renderers }){
+function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroids, shots, enemies, stats, rendererStats, earth, renderers }){
   renderers.forEach(render => render(scene, camera, animationFrame.delta));
 
   earth.rotation.x += getRad(0.3) * animationFrame.delta;
 
-  //stars
-  stars.forEach(function (star, index) {
+  //asteroids
+  asteroids.forEach(function (asteroid, index) {
     if (index % 3 === 0) {
-      star.position.z += (10 * animationFrame.delta);
+      asteroid.position.z += (10 * animationFrame.delta);
     } else if (index % 3 === 1) {
-      star.position.z += (20 * animationFrame.delta);
+      asteroid.position.z += (20 * animationFrame.delta);
     } else if (index % 3 === 2) {
-      star.position.z += (50 * animationFrame.delta);
+      asteroid.position.z += (50 * animationFrame.delta);
     }
 
-    if (star.position.z > 500) {
-      star.position.z = -500;
+    if (asteroid.position.z > 500) {
+      asteroid.position.z = -500;
     }
   });
   
