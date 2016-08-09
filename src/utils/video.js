@@ -12,8 +12,7 @@ const createVideo = (mediaStream) => {
   return video;
 };
 
-// getVideoMaterialRenderer$
-export const getVideoMaterial$ = (mediaStream) => Rx.Observable.create(observer => {
+export const getVideoMaterialRenderer$ = (mediaStream) => Rx.Observable.create(observer => {
   let video = createVideo(mediaStream);
   let videoTexture = new THREE.Texture(video);
   let material = new THREE.MeshLambertMaterial({ map : videoTexture });

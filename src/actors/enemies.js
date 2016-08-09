@@ -4,7 +4,7 @@ import Rx from 'rx';
 import { camera, scene, addRenderer, removeRenderer } from '../tools';
 import { level$ } from './score';
 import { spaceshipMesh$ } from './spaceship';
-import { randomFromRange, getVideoMaterial$ } from '../utils';
+import { randomFromRange, getVideoMaterialRenderer$ } from '../utils';
 
 const enemyGeometry = new THREE.BoxGeometry(10, 10, 10);
 const enemyMaterialHithox = new THREE.MeshBasicMaterial({
@@ -60,7 +60,7 @@ export const addExplosion = (enemy) => {
   let _renderMaterial;
   const { position, rotation } = enemy;
 
-  getVideoMaterial$('res/video/explosion/explosion.webm')
+  getVideoMaterialRenderer$('res/video/explosion/explosion.webm')
     .do((renderMaterial) => _renderMaterial = renderMaterial)
     .subscribe((renderMaterial) => {
       const geometry = new THREE.PlaneGeometry(20, 20, 32);
