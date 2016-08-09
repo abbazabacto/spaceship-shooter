@@ -17595,7 +17595,7 @@ var renderers$ = exports.renderers$ = _rx2.default.Observable.merge(addRenderer$
 }), removeRenderer$.map(function (renderer) {
   return function (renderers) {
     return renderers.filter(function (r) {
-      return !renderer;
+      return r !== renderer;
     });
   };
 })).scan(function (renderers, operation) {
