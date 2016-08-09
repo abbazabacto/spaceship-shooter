@@ -11,7 +11,7 @@ npm run cordova:browser
 Or alternatively run it on a simple (livereload) server.
 ```sh
 # simple server
-gulp serve
+npm start
 ```
 Run in an insecure Chrome Canary to prevent XSS blockage issues you won't encounter with a deployed Cordova application.
 ```sh
