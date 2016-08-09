@@ -16492,7 +16492,7 @@ var addExplosion = exports.addExplosion = function addExplosion(enemy) {
   var position = enemy.position;
   var rotation = enemy.rotation;
 
-  (0, _utils.getVideoMaterial$)('res/video/explosion/explosion.webm').do(function (renderMaterial) {
+  (0, _utils.getVideoMaterialRenderer$)('res/video/explosion/explosion.webm').do(function (renderMaterial) {
     return _renderMaterial = renderMaterial;
   }).subscribe(function (renderMaterial) {
     var geometry = new _three2.default.PlaneGeometry(20, 20, 32);
@@ -17970,7 +17970,7 @@ function createTextMesh(text, settings) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getVideoMaterial$ = undefined;
+exports.getVideoMaterialRenderer$ = undefined;
 
 var _rx = require('rx');
 
@@ -17990,8 +17990,7 @@ var createVideo = function createVideo(mediaStream) {
   return video;
 };
 
-// getVideoMaterialRenderer$
-var getVideoMaterial$ = exports.getVideoMaterial$ = function getVideoMaterial$(mediaStream) {
+var getVideoMaterialRenderer$ = exports.getVideoMaterialRenderer$ = function getVideoMaterialRenderer$(mediaStream) {
   return _rx2.default.Observable.create(function (observer) {
     var video = createVideo(mediaStream);
     var videoTexture = new THREE.Texture(video);
