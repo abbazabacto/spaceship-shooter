@@ -12,30 +12,73 @@ const createVideo = (mediaStream) => {
   return video;
 };
 
-export const getVideoMaterialRenderer$ = (mediaStream) => Rx.Observable.create(observer => {
+export const getVideoMaterialRenderer$ = (mediaStream) => {
   let video = createVideo(mediaStream);
-  let videoTexture = new THREE.Texture(video);
-  let material = new THREE.MeshLambertMaterial({ map : videoTexture });
 
-  videoTexture.minFilter = THREE.LinearFilter;
+  return Rx.Observable.create(observer => {
+    let canvas = document.createElement('canvas');
 
-  observer.next(() => {
-    if (video && video.ended) {
-      observer.completed();
-    }
+    let seriously = new Seriously();
+    let reformat = seriously.transform('reformat');
 
-    if (video && video.readyState === video.HAVE_ENOUGH_DATA){
-      videoTexture.needsUpdate = true;
-    }
+    let source = seriously.source(video);
+    source.mode = 'none';
 
-    return material;
+    let target = seriously.target(canvas);
+
+    reformat.width = target.width;
+    reformat.height = target.height;
+    reformat.mode = 'disort';
+
+    // source.width = canvas.width;
+    // source.height = canvas.height;
+    let chroma = seriously.effect('chroma');
+    // chroma.weight = 1.32;
+    chroma.balance = 0;
+    chroma.screen = 'rgb(0, 255, 0)';
+    chroma.clipWhite = 0.85;
+    chroma.clipBlack = 0.5125;
+
+    chroma.source = source;
+    
+    reformat.source = chroma;
+    target.source = reformat;
+
+    seriously.go();
+
+    let videoTexture = new THREE.Texture(canvas);
+    let material = new THREE.MeshLambertMaterial({ 
+      map : videoTexture,
+      transparent: true,
+    });
+
+    videoTexture.minFilter = THREE.LinearFilter;
+
+    observer.next(() => {
+      if (video && video.ended) {
+        observer.completed();
+      }
+
+      if (video && video.readyState === video.HAVE_ENOUGH_DATA){
+        videoTexture.needsUpdate = true;
+      }
+
+      return material;
+    });
+
+    return () => {
+      video.pause();
+      seriously.destroy(); // destroy composition
+
+      video = null;
+      canvas = null;
+      seriously = null;
+      reformat = null;
+      source = null;
+      target = null;
+      chroma = null;
+      videoTexture = null;
+      material = null;
+    };
   });
-
-  return () => {
-    video.pause();
-
-    video = null;
-    videoTexture = null;
-    material = null;
-  };
-});
+};
