@@ -16492,7 +16492,7 @@ var addExplosion = exports.addExplosion = function addExplosion(enemy) {
   var position = enemy.position;
   var rotation = enemy.rotation;
 
-  (0, _utils.getVideoMaterialRenderer$)('res/video/explosion/explosion.webm').do(function (renderMaterial) {
+  (0, _utils.getVideoMaterialRenderer$)('res/video/explosion/explosion_chroma.webm').do(function (renderMaterial) {
     return _renderMaterial = renderMaterial;
   }).subscribe(function (renderMaterial) {
     var geometry = new _three2.default.PlaneGeometry(20, 20, 32);
@@ -17991,10 +17991,44 @@ var createVideo = function createVideo(mediaStream) {
 };
 
 var getVideoMaterialRenderer$ = exports.getVideoMaterialRenderer$ = function getVideoMaterialRenderer$(mediaStream) {
+  var video = createVideo(mediaStream);
+
   return _rx2.default.Observable.create(function (observer) {
-    var video = createVideo(mediaStream);
-    var videoTexture = new THREE.Texture(video);
-    var material = new THREE.MeshLambertMaterial({ map: videoTexture });
+    var canvas = document.createElement('canvas');
+
+    var seriously = new Seriously();
+    var reformat = seriously.transform('reformat');
+
+    var source = seriously.source(video);
+    source.mode = 'none';
+
+    var target = seriously.target(canvas);
+
+    reformat.width = target.width;
+    reformat.height = target.height;
+    reformat.mode = 'disort';
+
+    // source.width = canvas.width;
+    // source.height = canvas.height;
+    var chroma = seriously.effect('chroma');
+    // chroma.weight = 1.32;
+    chroma.balance = 0;
+    chroma.screen = 'rgb(0, 255, 0)';
+    chroma.clipWhite = 0.85;
+    chroma.clipBlack = 0.5125;
+
+    chroma.source = source;
+
+    reformat.source = chroma;
+    target.source = reformat;
+
+    seriously.go();
+
+    var videoTexture = new THREE.Texture(canvas);
+    var material = new THREE.MeshLambertMaterial({
+      map: videoTexture,
+      transparent: true
+    });
 
     videoTexture.minFilter = THREE.LinearFilter;
 
@@ -18012,8 +18046,15 @@ var getVideoMaterialRenderer$ = exports.getVideoMaterialRenderer$ = function get
 
     return function () {
       video.pause();
+      seriously.destroy(); // destroy composition
 
       video = null;
+      canvas = null;
+      seriously = null;
+      reformat = null;
+      source = null;
+      target = null;
+      chroma = null;
       videoTexture = null;
       material = null;
     };
