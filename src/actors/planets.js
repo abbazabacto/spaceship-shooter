@@ -61,7 +61,7 @@ containerEarth.add(earthCloud);
 
 export const earth$ = Rx.Observable.of(containerEarth);
 
-const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+const sunLight = new THREE.DirectionalLight(0xffddee, 0.65);
 sunLight.position.set(0, 200, 6000);
 sunLight.target.position.set(0, -3400, -6000);
 scene.add(sunLight);
