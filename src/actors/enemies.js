@@ -19,7 +19,7 @@ const enemyMaterialHithox = new THREE.MeshBasicMaterial({
   color: 0x333333,
   wireframe: true,
   wireframeLinewidth: 0.01,
-  transparent: true,
+  // transparent: true,
 });
 enemyMaterialHithox.opacity = 0;
 
