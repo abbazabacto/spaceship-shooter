@@ -2,9 +2,9 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { scene, camera, renderer, renderers$, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
-import { aspectRatio$, getRad } from './utils';
-import { asteroids$, removeShot, shots$, removeEnemy, enemies$, addExplosion, addScore, spaceshipMesh$, earth$ } from './actors';
+import { scene, camera, renderer, renderers$, addRenderer, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
+import { aspectRatio$, getRad, getDeg } from './utils';
+import { asteroids$, removeShot, shots$, removeEnemy, enemies$, addExplosion, addScore, spaceshipObject$, earth$ } from './actors';
 
 stats$.subscribe(({ dom: domElement }) => {
   domElement.style.position = 'absolute';
@@ -29,17 +29,24 @@ gameElement.appendChild(renderer.domElement);
 camera.position.set(0, 0, 0);
 scene.add(camera);
 
-spaceshipMesh$.subscribe(function(spaceShipMesh){
-  var mesh = spaceShipMesh.clone();
-  mesh.position.y = -10;
-  mesh.rotation.y = getRad(-180);
-  scene.add(mesh);
+spaceshipObject$.subscribe(function(spaceshipObject){
+  const object = spaceshipObject.clone();
+  const [frame, base] = object.children;
+  addRenderer(() => {
+    frame.rotation.x = camera.rotation.x;
+    frame.rotation.y = camera.rotation.y;
+    frame.rotation.z = camera.rotation.z;
+  });
+  object.position.y = -7;
+
+  scene.add(object);
 });
 
+// use preloads$, dynamic combineLatest
 const preload$ = Rx.Observable
   .combineLatest(
-    spaceshipMesh$, Rx.DOM.ready(), 
-    spaceshipMesh => ({ spaceshipMesh })
+    spaceshipObject$, Rx.DOM.ready(), 
+    spaceshipObject => ({ spaceshipObject })
   );
 
 var light = new THREE.AmbientLight( 0x111111 );
@@ -92,17 +99,21 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroi
     }
   });
   
-  //shots
-  shots.forEach(function (shot) {
-    shot.translateZ(-200 * animationFrame.delta);
+  // shots
+  shots.forEach(shot => {
+    shot.translateZ(-2000 * animationFrame.delta);
+    
+    if (shot.scale.z < 20000) {
+      shot.scale.z += 4400 * animationFrame.delta;
+    }
 
-    if (shot.position.z > 500) {
+    if (shot.position.z > 10000) {
       removeShot(shot);
       return;
     }
     
     //collision detection
-    shot.geometry.vertices.forEach(function (vertex) {
+    shot.geometry.vertices.forEach((vertex) => {
       if(shot.hit){
         return;
       }
@@ -124,10 +135,10 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroi
   });
   
   //enemeies
-  enemies.forEach(function (enemy) {
-    enemy.translateZ(50 * animationFrame.delta);
+  enemies.forEach(enemy => {
+    enemy.translateZ(250 * animationFrame.delta);
 
-    if (enemy.position.z > 500) {
+    if (enemy.position.z > 10000) {
       removeEnemy(enemy);
     }
   });
