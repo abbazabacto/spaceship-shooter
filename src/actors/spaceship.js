@@ -55,6 +55,8 @@ export const spaceshipObject$ = Rx.Observable.combineLatest(
   base.add(chair);
   base.add(controlBoard);
   base.rotation.y = getRad(-90);
+  base.rotation.z = getRad(30);
+  chair.rotation.z = getRad(-30);
   _base.add(base);
 
   const spaceship = new THREE.Object3D();
