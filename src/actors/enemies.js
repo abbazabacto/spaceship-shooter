@@ -3,10 +3,18 @@ import Rx from 'rx';
 
 import { camera, scene, addRenderer, removeRenderer } from '../tools';
 import { level$ } from './score';
-import { spaceshipMesh$ } from './spaceship';
-import { randomFromRange, getVideoMaterialRenderer$ } from '../utils';
+import { randomFromRange, getVideoMaterialRenderer$, createModel } from '../utils';
 
-const enemyGeometry = new THREE.BoxGeometry(10, 10, 10);
+const spaceshipModel = createModel('res/models/spaceship.json');
+
+const spaceshipMesh$ = spaceshipModel.object$
+  .map(object => {
+    object.position.y -= 1;
+    object.scale.set(20, 20, 20);
+    return object;
+  });
+
+const enemyGeometry = new THREE.BoxGeometry(100, 100, 100);
 const enemyMaterialHithox = new THREE.MeshBasicMaterial({
   color: 0x333333,
   wireframe: true,
@@ -33,12 +41,12 @@ export const enemies$ = Rx.Observable
         enemy.add(spaceshipMesh.clone());
       });
 
-      enemy.position.x = randomFromRange(-250, 250);
-      enemy.position.y = randomFromRange(-250, 250);
-      enemy.position.z = -500;
+      enemy.position.x = randomFromRange(-3000, 3000);
+      enemy.position.y = randomFromRange(-1000, 1000);
+      enemy.position.z = -5000;
       enemy.lookAt(new THREE.Vector3(
         camera.position.x,
-        camera.position.y + 10,
+        camera.position.y + 50,
         camera.position.z));
       scene.add(enemy);
 
@@ -63,7 +71,7 @@ export const addExplosion = (enemy) => {
   getVideoMaterialRenderer$('res/video/explosion/explosion_chroma.webm')
     .do((renderMaterial) => _renderMaterial = renderMaterial)
     .subscribe((renderMaterial) => {
-      const geometry = new THREE.PlaneGeometry(20, 20, 32);
+      const geometry = new THREE.PlaneGeometry(200, 200, 200);
       plane = new THREE.Mesh(geometry, renderMaterial());
 
       plane.position.x = position.x;
