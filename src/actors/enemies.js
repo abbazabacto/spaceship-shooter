@@ -9,7 +9,7 @@ const spaceshipModel = createModel('res/models/spaceship.json');
 
 const spaceshipMesh$ = spaceshipModel.object$
   .map(object => {
-    object.position.y -= 1;
+    // object.position.y -= 1;
     object.scale.set(20, 20, 20);
     return object;
   });
