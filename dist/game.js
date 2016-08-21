@@ -17867,7 +17867,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var spaceshipModel = (0, _utils.createModel)('res/models/spaceship.json');
 
 var spaceshipMesh$ = spaceshipModel.object$.map(function (object) {
-  object.position.y -= 1;
+  // object.position.y -= 1;
   object.scale.set(20, 20, 20);
   return object;
 });
