@@ -17876,9 +17876,9 @@ var enemyGeometry = new _three2.default.BoxGeometry(100, 100, 100);
 var enemyMaterialHithox = new _three2.default.MeshBasicMaterial({
   color: 0x333333,
   wireframe: true,
-  wireframeLinewidth: 0.01,
-  transparent: true
+  wireframeLinewidth: 0.01
 });
+// transparent: true,
 enemyMaterialHithox.opacity = 0;
 
 var addEnemy$ = _score.level$.flatMapLatest(function (currentLevel) {
@@ -18038,7 +18038,7 @@ containerEarth.add(earthCloud);
 
 var earth$ = exports.earth$ = _rx2.default.Observable.of(containerEarth);
 
-var sunLight = new _three2.default.DirectionalLight(0xffffff, 1);
+var sunLight = new _three2.default.DirectionalLight(0xffddee, 0.65);
 sunLight.position.set(0, 200, 6000);
 sunLight.target.position.set(0, -3400, -6000);
 _scene.scene.add(sunLight);
@@ -18330,6 +18330,8 @@ var spaceshipObject$ = exports.spaceshipObject$ = _rx2.default.Observable.combin
   base.add(chair);
   base.add(controlBoard);
   base.rotation.y = (0, _misc.getRad)(-90);
+  base.rotation.z = (0, _misc.getRad)(30);
+  chair.rotation.z = (0, _misc.getRad)(-30);
   _base.add(base);
 
   var spaceship = new _three2.default.Object3D();
