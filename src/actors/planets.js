@@ -79,6 +79,7 @@ sunLight.shadow.mapSize.Height = 1024;
 const starField = THREEx.Planets.createStarfield(19900);
 
 rendererToggle$
+  .startWith({})
   .subscribe(({ webRtcVideo }) =>
     scene[!webRtcVideo ? 'add' : 'remove'](starField)
   );
