@@ -18056,7 +18056,7 @@ sunLight.shadow.mapSize.Height = 1024;
 
 var starField = _threex2.default.Planets.createStarfield(19900);
 
-_renderer.rendererToggle$.subscribe(function (_ref) {
+_renderer.rendererToggle$.startWith({}).subscribe(function (_ref) {
   var webRtcVideo = _ref.webRtcVideo;
   return _scene.scene[!webRtcVideo ? 'add' : 'remove'](starField);
 });
@@ -18292,51 +18292,46 @@ var _misc = require('../utils/misc');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ringsModel = (0, _models.createModel)('res/models/spaceship-parts/rings.json');
+var frameModel = (0, _models.createModel)('res/models/spaceship-parts/frame.json');
 var gunsModel = (0, _models.createModel)('res/models/spaceship-parts/guns.json');
-var shipLowerModel = (0, _models.createModel)('res/models/spaceship-parts/ship-lower.json');
+var domeModel = (0, _models.createModel)('res/models/spaceship-parts/dome.json');
 var chairModel = (0, _models.createModel)('res/models/spaceship-parts/chair.json');
-var controlBoardModel = (0, _models.createModel)('res/models/spaceship-parts/control-board.json');
+var steeringWheelModel = (0, _models.createModel)('res/models/spaceship-parts/steering-wheel.json');
 
 // add to preloads$...
 /// spaceshipModel.progress$.subscribe(console.log.bind(console));
 
 // utils/models.js -> createGroup?
-var spaceshipObject$ = exports.spaceshipObject$ = _rx2.default.Observable.combineLatest(ringsModel.object$, gunsModel.object$, shipLowerModel.object$, chairModel.object$, controlBoardModel.object$, function (rings, guns, shipLower, chair, controlBoard) {
+var spaceshipObject$ = exports.spaceshipObject$ = _rx2.default.Observable.combineLatest(frameModel.object$, gunsModel.object$, domeModel.object$, chairModel.object$, steeringWheelModel.object$, function (frame, guns, dome, chair, steeringWheel, controlBoard) {
   return {
-    rings: rings,
+    frame: frame,
     guns: guns,
-    shipLower: shipLower,
+    dome: dome,
     chair: chair,
-    controlBoard: controlBoard
+    steeringWheel: steeringWheel
   };
 }).map(function (_ref) {
-  var rings = _ref.rings;
+  var frame = _ref.frame;
   var guns = _ref.guns;
-  var shipLower = _ref.shipLower;
+  var dome = _ref.dome;
   var chair = _ref.chair;
-  var controlBoard = _ref.controlBoard;
+  var steeringWheel = _ref.steeringWheel;
 
-  var _frame = new _three2.default.Object3D();
-  var frame = new _three2.default.Object3D();
-  frame.add(rings);
-  frame.add(guns);
-  frame.add(controlBoard);
-  frame.rotation.y = (0, _misc.getRad)(-90);
-  _frame.add(frame);
+  var _frameHolder = new _three2.default.Object3D();
+  var frameHolder = new _three2.default.Object3D();
+  frameHolder.add(frame);
+  frameHolder.add(guns);
+  _frameHolder.add(frameHolder);
 
   var _base = new _three2.default.Object3D();
   var base = new _three2.default.Object3D();
-  base.add(shipLower);
+  base.add(dome);
+  base.add(steeringWheel);
   base.add(chair);
-  base.add(controlBoard);
-  base.rotation.y = (0, _misc.getRad)(-90);
-  base.rotation.z = (0, _misc.getRad)(30);
-  chair.rotation.z = (0, _misc.getRad)(-30);
   _base.add(base);
 
   var spaceship = new _three2.default.Object3D();
-  spaceship.add(_frame);
+  spaceship.add(_frameHolder);
   spaceship.add(_base);
 
   return spaceship;
@@ -18408,8 +18403,8 @@ _actors.spaceshipObject$.subscribe(function (spaceshipObject) {
     frame.rotation.y = _tools.camera.rotation.y;
     frame.rotation.z = _tools.camera.rotation.z;
   });
-  object.position.y = -6;
-  object.position.z = -2;
+  object.position.y = -5.5;
+  object.position.z = -1.5;
 
   _tools.scene.add(object);
 });
@@ -18947,7 +18942,7 @@ var rendererToggle$ = exports.rendererToggle$ = _rx2.default.Observable.combineL
   return enableWebRtc ? _webrtc.webRtcVideo$ : _rx2.default.Observable.of(undefined);
 }), function (effectRenderer, webRtcVideo) {
   return { effectRenderer: effectRenderer, webRtcVideo: webRtcVideo };
-}).share();
+}).shareReplay(1);
 
 rendererToggle$.subscribe(function (_ref2) {
   var effectRenderer = _ref2.effectRenderer;
@@ -19658,9 +19653,8 @@ var videoInput$ = devices$.map(function (devices) {
   return devices && devices.length;
 })
 // take back-cam only (assumption.. last, of multiple cams)
-.filter(function (devices) {
-  return devices.length > 1;
-}).map(function (devices) {
+// .filter(devices => devices.length > 1)
+.map(function (devices) {
   return devices[devices.length - 1];
 });
 
