@@ -2,7 +2,7 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { renderer, camera, scene, controls$ } from '../tools';
+import { renderer, camera, scene } from '../tools';
 
 const shotGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
 const shotMaterial = new THREE.MeshBasicMaterial({
@@ -26,12 +26,6 @@ const addShot$ = Rx.Observable
   .throttle(200);
 
 const removeShot$ = new Rx.Subject()
-
-var usesDeviceOrientation;
-
-controls$.subscribe(function(controls){
-  usesDeviceOrientation = controls.autoRotate === undefined;
-});
 
 let count = 0;
 
