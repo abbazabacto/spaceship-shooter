@@ -4,63 +4,59 @@ import Rx from 'rx';
 import { createModel } from '../utils/models';
 import { getRad } from '../utils/misc';
 
-const ringsModel = createModel('res/models/spaceship-parts/rings.json');
+const frameModel = createModel('res/models/spaceship-parts/frame.json');
 const gunsModel = createModel('res/models/spaceship-parts/guns.json');
-const shipLowerModel = createModel('res/models/spaceship-parts/ship-lower.json');
+const domeModel = createModel('res/models/spaceship-parts/dome.json');
 const chairModel = createModel('res/models/spaceship-parts/chair.json');
-const controlBoardModel = createModel('res/models/spaceship-parts/control-board.json');
+const steeringWheelModel = createModel('res/models/spaceship-parts/steering-wheel.json');
 
 // add to preloads$...
 /// spaceshipModel.progress$.subscribe(console.log.bind(console));
 
 // utils/models.js -> createGroup?
 export const spaceshipObject$ = Rx.Observable.combineLatest(
-  ringsModel.object$,
+  frameModel.object$,
   gunsModel.object$,
-  shipLowerModel.object$,
+  domeModel.object$,
   chairModel.object$,
-  controlBoardModel.object$,
+  steeringWheelModel.object$,
   (
-    rings,
+    frame,
     guns,
-    shipLower,
+    dome,
     chair,
+    steeringWheel,
     controlBoard
   ) => ({
-    rings,
+    frame,
     guns,
-    shipLower,
+    dome,
     chair,
-    controlBoard,
+    steeringWheel,
   })
 )
 .map(({ 
-  rings,
+  frame,
   guns,
-  shipLower,
+  dome,
   chair,
-  controlBoard,
+  steeringWheel,
 }) => {
-  const _frame = new THREE.Object3D();
-  const frame = new THREE.Object3D();
-  frame.add(rings);
-  frame.add(guns);
-  frame.add(controlBoard);
-  frame.rotation.y = getRad(-90);
-  _frame.add(frame);
+  const _frameHolder = new THREE.Object3D();
+  const frameHolder = new THREE.Object3D();
+  frameHolder.add(frame);
+  frameHolder.add(guns);
+  _frameHolder.add(frameHolder);
 
   const _base = new THREE.Object3D();
   const base = new THREE.Object3D();
-  base.add(shipLower);
+  base.add(dome);
+  base.add(steeringWheel);
   base.add(chair);
-  base.add(controlBoard);
-  base.rotation.y = getRad(-90);
-  base.rotation.z = getRad(30);
-  chair.rotation.z = getRad(-30);
   _base.add(base);
 
   const spaceship = new THREE.Object3D();
-  spaceship.add(_frame);
+  spaceship.add(_frameHolder);
   spaceship.add(_base);
 
   return spaceship;
