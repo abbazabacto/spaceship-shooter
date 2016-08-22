@@ -17961,7 +17961,7 @@ var addExplosion = exports.addExplosion = function addExplosion(enemy) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.enableStarField = exports.earth$ = undefined;
+exports.earth$ = undefined;
 
 var _three = (typeof window !== "undefined" ? window['THREE'] : typeof global !== "undefined" ? global['THREE'] : null);
 
@@ -17980,6 +17980,8 @@ var _threex3 = require('../../lib/planets/threex.atmospherematerial');
 var _threex4 = _interopRequireDefault(_threex3);
 
 var _scene = require('../tools/scene');
+
+var _renderer = require('../tools/renderer');
 
 var _misc = require('../utils/misc');
 
@@ -18038,6 +18040,10 @@ containerEarth.add(earthCloud);
 
 var earth$ = exports.earth$ = _rx2.default.Observable.of(containerEarth);
 
+(0, _renderer.addRenderer)(function (scene, camare, delta) {
+  containerEarth.rotation.x += (0, _misc.getRad)(0.3) * delta;
+});
+
 var sunLight = new _three2.default.DirectionalLight(0xffddee, 0.65);
 sunLight.position.set(0, 200, 6000);
 sunLight.target.position.set(0, -3400, -6000);
@@ -18050,19 +18056,14 @@ sunLight.shadow.mapSize.Height = 1024;
 
 var starField = _threex2.default.Planets.createStarfield(19900);
 
-var showStarField$ = new _rx2.default.BehaviorSubject(true);
-
-showStarField$.subscribe(function (showStarField) {
-  return _scene.scene[showStarField ? 'add' : 'remove'](starField);
+_renderer.rendererToggle$.subscribe(function (_ref) {
+  var webRtcVideo = _ref.webRtcVideo;
+  return _scene.scene[!webRtcVideo ? 'add' : 'remove'](starField);
 });
-
-var enableStarField = exports.enableStarField = function enableStarField(enabled) {
-  return showStarField$.onNext(enabled);
-};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../../lib/planets/threex.atmospherematerial":9,"../../lib/planets/threex.planets":10,"../tools/scene":35,"../utils/misc":38,"rx":19}],26:[function(require,module,exports){
+},{"../../lib/planets/threex.atmospherematerial":9,"../../lib/planets/threex.planets":10,"../tools/renderer":34,"../tools/scene":35,"../utils/misc":38,"rx":19}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -18407,7 +18408,8 @@ _actors.spaceshipObject$.subscribe(function (spaceshipObject) {
     frame.rotation.y = _tools.camera.rotation.y;
     frame.rotation.z = _tools.camera.rotation.z;
   });
-  object.position.y = -7;
+  object.position.y = -6;
+  object.position.z = -2;
 
   _tools.scene.add(object);
 });
@@ -18462,8 +18464,6 @@ function render(_ref4) {
   renderers.forEach(function (render) {
     return render(_tools.scene, _tools.camera, animationFrame.delta);
   });
-
-  earth.rotation.x += (0, _utils.getRad)(0.3) * animationFrame.delta;
 
   //asteroids
   asteroids.forEach(function (asteroid, index) {
@@ -18812,7 +18812,7 @@ var controls$ = exports.controls$ = _rx2.default.Observable.merge(orbitControls$
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.removeRenderer = exports.addRenderer = exports.renderers$ = exports.effectRenderer$ = exports.rendererStereoEffect$ = exports.renderer = undefined;
+exports.removeRenderer = exports.addRenderer = exports.renderers$ = exports.rendererToggle$ = exports.effectRenderer$ = exports.rendererStereoEffect$ = exports.renderer = undefined;
 exports.setRenderEffect = setRenderEffect;
 
 var _three = (typeof window !== "undefined" ? window['THREE'] : typeof global !== "undefined" ? global['THREE'] : null);
@@ -18834,8 +18834,6 @@ require('../../lib/effects/VREffect');
 var _screen = require('../utils/screen');
 
 var _webrtc = require('../utils/webrtc');
-
-var _planets = require('../actors/planets');
 
 var _scene = require('./scene');
 
@@ -18945,15 +18943,15 @@ enableWebRtc$.subscribe(function (enableWebRtc) {
 
 var plane = undefined;
 
-_rx2.default.Observable.combineLatest(effectRenderer$, enableWebRtc$.flatMapLatest(function (enableWebRtc) {
+var rendererToggle$ = exports.rendererToggle$ = _rx2.default.Observable.combineLatest(effectRenderer$, enableWebRtc$.flatMapLatest(function (enableWebRtc) {
   return enableWebRtc ? _webrtc.webRtcVideo$ : _rx2.default.Observable.of(undefined);
 }), function (effectRenderer, webRtcVideo) {
   return { effectRenderer: effectRenderer, webRtcVideo: webRtcVideo };
-}).subscribe(function (_ref2) {
+}).share();
+
+rendererToggle$.subscribe(function (_ref2) {
   var effectRenderer = _ref2.effectRenderer;
   var webRtcVideo = _ref2.webRtcVideo;
-
-  (0, _planets.enableStarField)(!webRtcVideo);
 
   if (webRtcVideo) {
     var geometry;
@@ -19018,6 +19016,10 @@ function removeFocus() {
 var addRenderer$ = new _rx2.default.ReplaySubject(1);
 var removeRenderer$ = new _rx2.default.ReplaySubject(1);
 
+// need of initial renderers as addRenderer does get called before initialization of replay subjects above
+// might be auto-solved by updating to rxjs5
+var initialRenderers = [];
+
 var renderers$ = exports.renderers$ = _rx2.default.Observable.merge(addRenderer$.map(function (renderer) {
   return function (renderers) {
     return renderers.concat([renderer]);
@@ -19030,10 +19032,15 @@ var renderers$ = exports.renderers$ = _rx2.default.Observable.merge(addRenderer$
   };
 })).scan(function (renderers, operation) {
   return operation(renderers);
-}, []).startWith([]);
+}, initialRenderers).startWith(initialRenderers).do(function (_) {
+  initialRenderers = null;
+});
 
 var addRenderer = exports.addRenderer = function addRenderer(renderer) {
-  return addRenderer$.onNext(renderer);
+  if (initialRenderers !== null) {
+    initialRenderers.push(renderer);
+  }
+  addRenderer$.onNext(renderer);
 };
 var removeRenderer = exports.removeRenderer = function removeRenderer(renderer) {
   return removeRenderer$.onNext(renderer);
@@ -19041,7 +19048,7 @@ var removeRenderer = exports.removeRenderer = function removeRenderer(renderer) 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../actors/planets":25,"../utils/screen":40,"../utils/webrtc":43,"./scene":35,"rx":19}],35:[function(require,module,exports){
+},{"../../lib/effects/StereoEffect":4,"../../lib/effects/VREffect":5,"../utils/screen":40,"../utils/webrtc":43,"./scene":35,"rx":19}],35:[function(require,module,exports){
 (function (global){
 'use strict';
 
