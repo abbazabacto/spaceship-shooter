@@ -6,6 +6,8 @@ import { scene, camera, renderer, renderers$, addRenderer, effectRenderer$, cont
 import { aspectRatio$, getRad, getDeg } from './utils';
 import { asteroids$, removeShot, shots$, removeEnemy, enemies$, addExplosion, addScore, spaceshipObject$, earth$ } from './actors';
 
+import {createGameLoop} from './tools/gameLoop';
+
 stats$.subscribe(({ dom: domElement }) => {
   domElement.style.position = 'absolute';
   domElement.style.top = 'auto';
@@ -53,44 +55,49 @@ const preload$ = Rx.Observable
 var light = new THREE.AmbientLight( 0x111111 );
 scene.add( light );
 
-const game$ = Rx.Observable
-  .combineLatest(
-   animationFrame$, aspectRatio$, effectRenderer$, controls$, asteroids$, shots$, enemies$, stats$, rendererStats$, earth$, renderers$, 
-    function(animationFrame, aspectRatio, effectRenderer, controls, asteroids, shots, enemies, stats, rendererStats, earth, renderers){
-      return { 
-        animationFrame,
-        aspectRatio,
-        effectRenderer,
-        controls,
-        asteroids,
-        shots,
-        enemies,
-        stats,
-        rendererStats,
-        earth,
-        renderers
-      };  
-    }
-  )
-  //only update when frame is ready to render
-  //otherwise frames could drop on overloading changes in other observables
-  .distinctUntilChanged(({ animationFrame }) => animationFrame.timestamp);
+const game$ = createGameLoop({
+   animationFrame$,
+   aspectRatio$,
+   effectRenderer$,
+   controls$,
+   asteroids$,
+   shots$,
+   enemies$,
+   stats$,
+   rendererStats$,
+   earth$,
+  renderers$,
+});
 
 preload$
   .flatMap(() => game$) 
-  .subscribe(render);
+  .subscribe(({ 
+    animationFrame,
+    aspectRatio,
+    effectRenderer,
+    controls,
+    asteroids,
+    shots,
+    enemies,
+    stats,
+    rendererStats,
+    earth,
+    renderers,
+  }) => {
+  const { delta } = animationFrame; 
 
-function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroids, shots, enemies, stats, rendererStats, earth, renderers }){
-  renderers.forEach(render => render(scene, camera, animationFrame.delta));
+  renderers.forEach(render => render(scene, camera, delta));
+  // replace with -->
+  // renderers.forEach(render => render({ scene, camera, delta }));
 
   //asteroids
   asteroids.forEach(function (asteroid, index) {
     if (index % 3 === 0) {
-      asteroid.position.z += (10 * animationFrame.delta);
+      asteroid.position.z += (10 * delta);
     } else if (index % 3 === 1) {
-      asteroid.position.z += (20 * animationFrame.delta);
+      asteroid.position.z += (20 * delta);
     } else if (index % 3 === 2) {
-      asteroid.position.z += (50 * animationFrame.delta);
+      asteroid.position.z += (50 * delta);
     }
 
     if (asteroid.position.z > 500) {
@@ -100,10 +107,10 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroi
   
   // shots
   shots.forEach(shot => {
-    shot.translateZ(-2000 * animationFrame.delta);
+    shot.translateZ(-2000 * delta);
     
     if (shot.scale.z < 20000) {
-      shot.scale.z += 4400 * animationFrame.delta;
+      shot.scale.z += 4400 * delta;
     }
 
     if (shot.position.z > 10000) {
@@ -135,7 +142,7 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroi
   
   //enemeies
   enemies.forEach(enemy => {
-    enemy.translateZ(250 * animationFrame.delta);
+    enemy.translateZ(250 * delta);
 
     if (enemy.position.z > 10000) {
       removeEnemy(enemy);
@@ -150,7 +157,7 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroi
   
   //update
   camera.updateProjectionMatrix();
-  controls.update(animationFrame.delta);
+  controls.update(delta);
   
   //render
   effectRenderer.render(scene, camera);
@@ -158,4 +165,4 @@ function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroi
   //stats
   stats.update();
   rendererStats.update(renderer);
-}
+});
