@@ -82,8 +82,6 @@ preload$
 function render({ animationFrame, aspectRatio, effectRenderer, controls, asteroids, shots, enemies, stats, rendererStats, earth, renderers }){
   renderers.forEach(render => render(scene, camera, animationFrame.delta));
 
-  earth.rotation.x += getRad(0.3) * animationFrame.delta;
-
   //asteroids
   asteroids.forEach(function (asteroid, index) {
     if (index % 3 === 0) {
