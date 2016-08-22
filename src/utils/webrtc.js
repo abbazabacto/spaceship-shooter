@@ -6,7 +6,7 @@ const videoInput$ = devices$
   .map(devices => devices.filter(device => device.kind === 'videoinput'))
   .filter(devices => devices && devices.length)
   // take back-cam only (assumption.. last, of multiple cams)
-  .filter(devices => devices.length > 1)
+  // .filter(devices => devices.length > 1)
   .map(devices => devices[devices.length - 1]);
 
 const mediaStream$ = videoInput$

@@ -118,7 +118,7 @@ export const rendererToggle$ = Rx.Observable.combineLatest(
   ),
   (effectRenderer, webRtcVideo) => ({ effectRenderer, webRtcVideo })
 )
-.share();
+.shareReplay(1);
 
 rendererToggle$
   .subscribe(({ effectRenderer, webRtcVideo }) => {
