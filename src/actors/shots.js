@@ -47,7 +47,7 @@ export const shots$ = Rx.Observable
 
       shot.translateX(count % 2 ? -7 : 7);
       shot.translateZ(-14);
-      shot.translateY(-1);
+      shot.translateY(-2);
 
       scene.add(shot);
 
