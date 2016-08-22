@@ -18223,12 +18223,6 @@ _rx2.default.Observable.fromEvent(document, 'keydown').filter(function (e) {
 
 var removeShot$ = new _rx2.default.Subject();
 
-var usesDeviceOrientation;
-
-_tools.controls$.subscribe(function (controls) {
-  usesDeviceOrientation = controls.autoRotate === undefined;
-});
-
 var count = 0;
 
 var shots$ = exports.shots$ = _rx2.default.Observable.merge(addShot$.map(function (index) {
@@ -18296,26 +18290,26 @@ var frameModel = (0, _models.createModel)('res/models/spaceship-parts/frame.json
 var gunsModel = (0, _models.createModel)('res/models/spaceship-parts/guns.json');
 var domeModel = (0, _models.createModel)('res/models/spaceship-parts/dome.json');
 var chairModel = (0, _models.createModel)('res/models/spaceship-parts/chair.json');
-var steeringWheelModel = (0, _models.createModel)('res/models/spaceship-parts/steering-wheel.json');
+var wheelModel = (0, _models.createModel)('res/models/spaceship-parts/wheel.json');
 
 // add to preloads$...
 /// spaceshipModel.progress$.subscribe(console.log.bind(console));
 
 // utils/models.js -> createGroup?
-var spaceshipObject$ = exports.spaceshipObject$ = _rx2.default.Observable.combineLatest(frameModel.object$, gunsModel.object$, domeModel.object$, chairModel.object$, steeringWheelModel.object$, function (frame, guns, dome, chair, steeringWheel, controlBoard) {
+var spaceshipObject$ = exports.spaceshipObject$ = _rx2.default.Observable.combineLatest(frameModel.object$, gunsModel.object$, domeModel.object$, chairModel.object$, wheelModel.object$, function (frame, guns, dome, chair, wheel, controlBoard) {
   return {
     frame: frame,
     guns: guns,
     dome: dome,
     chair: chair,
-    steeringWheel: steeringWheel
+    wheel: wheel
   };
 }).map(function (_ref) {
   var frame = _ref.frame;
   var guns = _ref.guns;
   var dome = _ref.dome;
   var chair = _ref.chair;
-  var steeringWheel = _ref.steeringWheel;
+  var wheel = _ref.wheel;
 
   var _frameHolder = new _three2.default.Object3D();
   var frameHolder = new _three2.default.Object3D();
@@ -18326,7 +18320,7 @@ var spaceshipObject$ = exports.spaceshipObject$ = _rx2.default.Observable.combin
   var _base = new _three2.default.Object3D();
   var base = new _three2.default.Object3D();
   base.add(dome);
-  base.add(steeringWheel);
+  base.add(wheel);
   base.add(chair);
   _base.add(base);
 
