@@ -11,7 +11,8 @@ if(window.location.pathname.indexOf('/spaceship-shooter') === 0) {
 import _, { createAtmosphereMaterial } from '../../lib/planets/threex.atmospherematerial';
 
 import { scene } from '../tools/scene';
-import { getRad  } from '../utils/misc';
+import { addRenderer, rendererToggle$ } from '../tools/renderer';
+import { getRad } from '../utils/misc';
 
 const containerEarth = new THREE.Object3D();
 containerEarth.position.y = -3400;
@@ -61,6 +62,10 @@ containerEarth.add(earthCloud);
 
 export const earth$ = Rx.Observable.of(containerEarth);
 
+addRenderer((scene, camare, delta) => {
+  containerEarth.rotation.x += getRad(0.3) * delta;
+});
+
 const sunLight = new THREE.DirectionalLight(0xffddee, 0.65);
 sunLight.position.set(0, 200, 6000);
 sunLight.target.position.set(0, -3400, -6000);
@@ -73,11 +78,7 @@ sunLight.shadow.mapSize.Height = 1024;
 
 const starField = THREEx.Planets.createStarfield(19900);
 
-const showStarField$ = new Rx.BehaviorSubject(true);
-
-showStarField$
-  .subscribe(showStarField =>
-    scene[showStarField ? 'add' : 'remove'](starField)
+rendererToggle$
+  .subscribe(({ webRtcVideo }) =>
+    scene[!webRtcVideo ? 'add' : 'remove'](starField)
   );
-
-export const enableStarField = (enabled) => showStarField$.onNext(enabled);
