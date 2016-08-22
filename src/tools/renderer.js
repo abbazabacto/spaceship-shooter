@@ -6,8 +6,6 @@ import '../../lib/effects/VREffect';
 import { fullscreen } from '../utils/screen';
 import { webRtcVideo$ } from '../utils/webrtc';
 
-import { enableStarField } from '../actors/planets';
-
 const gameElement = document.getElementsByTagName('game')[0];
 const buttons = document.getElementsByTagName('button');
 
@@ -113,15 +111,17 @@ import { scene } from './scene';
 
 let plane;
 
-Rx.Observable.combineLatest(
+export const rendererToggle$ = Rx.Observable.combineLatest(
   effectRenderer$,
   enableWebRtc$.flatMapLatest(enableWebRtc =>
     enableWebRtc ? webRtcVideo$ : Rx.Observable.of(undefined)
   ),
   (effectRenderer, webRtcVideo) => ({ effectRenderer, webRtcVideo })
 )
-.subscribe(({ effectRenderer, webRtcVideo }) => {
-  enableStarField(!webRtcVideo);
+.share();
+
+rendererToggle$
+  .subscribe(({ effectRenderer, webRtcVideo }) => {
 
   if (webRtcVideo) {
     const videoTexture = new THREE.Texture(webRtcVideo);
@@ -180,14 +180,26 @@ function removeFocus() {
 const addRenderer$ = new Rx.ReplaySubject(1);
 const removeRenderer$ = new Rx.ReplaySubject(1);
 
+// need of initial renderers as addRenderer does get called before initialization of replay subjects above
+// might be auto-solved by updating to rxjs5
+let initialRenderers = [];
+
 export const renderers$ = Rx.Observable.merge(
   addRenderer$
-    .map(renderer => (renderers) => renderers.concat([renderer])),
+    .map(renderer => renderers => renderers.concat([renderer])),
   removeRenderer$
-    .map(renderer => (renderers) => renderers.filter(r => r !== renderer))
+    .map(renderer => renderers => renderers.filter(r => r !== renderer))
 )
-.scan((renderers, operation) => operation(renderers), [])
-.startWith([]);
+.scan((renderers, operation) => operation(renderers), initialRenderers)
+.startWith(initialRenderers)
+.do(_ => {
+  initialRenderers = null;
+});
 
-export const addRenderer = (renderer) => addRenderer$.onNext(renderer);
+export const addRenderer = renderer => {
+  if (initialRenderers !== null) {
+    initialRenderers.push(renderer);
+  }
+  addRenderer$.onNext(renderer);
+};
 export const removeRenderer = renderer => removeRenderer$.onNext(renderer);
