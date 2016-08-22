@@ -37,7 +37,8 @@ spaceshipObject$.subscribe(function(spaceshipObject){
     frame.rotation.y = camera.rotation.y;
     frame.rotation.z = camera.rotation.z;
   });
-  object.position.y = -7;
+  object.position.y = -6;
+  object.position.z = -2;
 
   scene.add(object);
 });
