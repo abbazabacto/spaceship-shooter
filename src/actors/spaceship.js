@@ -8,7 +8,7 @@ const frameModel = createModel('res/models/spaceship-parts/frame.json');
 const gunsModel = createModel('res/models/spaceship-parts/guns.json');
 const domeModel = createModel('res/models/spaceship-parts/dome.json');
 const chairModel = createModel('res/models/spaceship-parts/chair.json');
-const steeringWheelModel = createModel('res/models/spaceship-parts/steering-wheel.json');
+const wheelModel = createModel('res/models/spaceship-parts/wheel.json');
 
 // add to preloads$...
 /// spaceshipModel.progress$.subscribe(console.log.bind(console));
@@ -19,20 +19,20 @@ export const spaceshipObject$ = Rx.Observable.combineLatest(
   gunsModel.object$,
   domeModel.object$,
   chairModel.object$,
-  steeringWheelModel.object$,
+  wheelModel.object$,
   (
     frame,
     guns,
     dome,
     chair,
-    steeringWheel,
+    wheel,
     controlBoard
   ) => ({
     frame,
     guns,
     dome,
     chair,
-    steeringWheel,
+    wheel,
   })
 )
 .map(({ 
@@ -40,7 +40,7 @@ export const spaceshipObject$ = Rx.Observable.combineLatest(
   guns,
   dome,
   chair,
-  steeringWheel,
+  wheel,
 }) => {
   const _frameHolder = new THREE.Object3D();
   const frameHolder = new THREE.Object3D();
@@ -51,7 +51,7 @@ export const spaceshipObject$ = Rx.Observable.combineLatest(
   const _base = new THREE.Object3D();
   const base = new THREE.Object3D();
   base.add(dome);
-  base.add(steeringWheel);
+  base.add(wheel);
   base.add(chair);
   _base.add(base);
 
