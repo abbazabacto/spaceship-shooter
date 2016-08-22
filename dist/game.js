@@ -18241,7 +18241,7 @@ var shots$ = exports.shots$ = _rx2.default.Observable.merge(addShot$.map(functio
 
   shot.translateX(count % 2 ? -7 : 7);
   shot.translateZ(-14);
-  shot.translateY(-1);
+  shot.translateY(-2);
 
   _tools.scene.add(shot);
 
@@ -18403,8 +18403,8 @@ _actors.spaceshipObject$.subscribe(function (spaceshipObject) {
     frame.rotation.y = _tools.camera.rotation.y;
     frame.rotation.z = _tools.camera.rotation.z;
   });
-  object.position.y = -5.5;
-  object.position.z = -1.5;
+  object.position.y = -6;
+  object.position.z = -2;
 
   _tools.scene.add(object);
 });
