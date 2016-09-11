@@ -5,3 +5,7 @@ node_modules
 cordova/**
 !cordova/config.xml
 res/models/asteroids
+.png
+.jpg
+!dist/**/*.png
+!dist/**/*.jpg
