@@ -3,7 +3,9 @@ import Rx from 'rx';
 import '../../lib/controls/OrbitControls';
 import '../../lib/controls/DeviceOrientationControls';
 import '../../lib/controls/VRControls';
+import '../../lib/gamepad/ViveController';
 
+import { scene } from './scene';
 import { camera } from './camera';
 import { renderer } from './renderer';
 
@@ -57,3 +59,26 @@ const deviceOrientationControls$ = Rx.Observable
 
 export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$)
   .takeUntil(deviceOrientationControls$);
+
+const controller1 = new THREE.ViveController( 0 );
+controller1.standingMatrix = vrControls.getStandingMatrix();
+scene.add( controller1 );
+
+const controller2 = new THREE.ViveController( 1 );
+controller2.standingMatrix = vrControls.getStandingMatrix();
+scene.add( controller2 );
+
+var loader = new THREE.OBJLoader();
+loader.setPath( 'res/models/vive/' );
+loader.load( 'vive.obj', function ( object ) {
+  var loader = new THREE.TextureLoader();
+  loader.setPath( 'res/models/vive/' );
+
+  var controller = object.children[ 0 ];
+  controller.material.map = loader.load( 'onepointfive_texture.png' );
+  controller.material.specularMap = loader.load( 'onepointfive_spec.png' );
+
+  controller1.add( object.clone() );
+  controller2.add( object.clone() );
+});
+
