@@ -39,8 +39,8 @@ spaceshipObject$.subscribe(function(spaceshipObject){
     frame.rotation.y = camera.rotation.y;
     frame.rotation.z = camera.rotation.z;
   });
-  object.position.y = -6;
-  object.position.z = -2;
+  object.position.y = -4;
+  object.position.z = -1;
 
   scene.add(object);
 });
@@ -56,16 +56,16 @@ var light = new THREE.AmbientLight( 0x111111 );
 scene.add( light );
 
 const game$ = createGameLoop({
-   animationFrame$,
-   aspectRatio$,
-   effectRenderer$,
-   controls$,
-   asteroids$,
-   shots$,
-   enemies$,
-   stats$,
-   rendererStats$,
-   earth$,
+  animationFrame$,
+  aspectRatio$,
+  effectRenderer$,
+  controls$,
+  asteroids$,
+  shots$,
+  enemies$,
+  stats$,
+  rendererStats$,
+  earth$,
   renderers$,
 });
 
