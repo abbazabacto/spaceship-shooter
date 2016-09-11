@@ -19201,6 +19201,8 @@ if (_webvr2.default.isAvailable() === true) {
     enableWebVr && (0, _screen.fullscreen)(gameElement);
   });
 
+  document.body.appendChild(_webvr2.default.getButton(vrEffect));
+
   enableStereoRender$.subscribe(function (enableStereoRender) {
     vrEffect.disabled = enableStereoRender;
   });
