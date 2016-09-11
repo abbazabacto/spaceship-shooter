@@ -79,6 +79,8 @@ if (WEBVR.isAvailable() === true) {
     enableWebVr && fullscreen(gameElement);
   });
 
+  document.body.appendChild(WEBVR.getButton(vrEffect));
+
   enableStereoRender$
     .subscribe(enableStereoRender => {
       vrEffect.disabled = enableStereoRender;
