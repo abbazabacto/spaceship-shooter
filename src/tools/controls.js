@@ -37,6 +37,18 @@ vrControlsSubject$.onNext(hasVRControls ? vrControls : undefined);
 const deviceOrientationControls$ = Rx.Observable
   .fromEvent(window, 'deviceorientation')
   .filter(event => event.alpha)
+  .map(_ => {
+    const deviceOrientationControls = new THREE.DeviceOrientationControls(camera, true);
+    deviceOrientationControls.connect();
+    deviceOrientationControls.update();
+    
+    return deviceOrientationControls;
+  })
+  .takeUntil(Rx.Observable.fromEvent(window, 'deviceorientation'))
+  .share();
+
+export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$)
+  .takeUntil(deviceOrientationControls$)
   .flatMap(() =>
     vrControlsSubject$
       .map((vrControls) => {
@@ -45,20 +57,9 @@ const deviceOrientationControls$ = Rx.Observable
           // vrControls.update();
           vrControls.resetPose();
           return vrControls;
-        }
-
-        const deviceOrientationControls = new THREE.DeviceOrientationControls(camera, true);
-        deviceOrientationControls.connect();
-        deviceOrientationControls.update();
-        
-        return deviceOrientationControls;
+        };
       })
-  )
-  .takeUntil(Rx.Observable.fromEvent(window, 'deviceorientation'))
-  .share();
-
-export const controls$ = Rx.Observable.merge(orbitControls$, deviceOrientationControls$)
-  .takeUntil(deviceOrientationControls$);
+  );
 
 const controller1 = new THREE.ViveController( 0 );
 controller1.standingMatrix = vrControls.getStandingMatrix();
