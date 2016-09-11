@@ -58,7 +58,13 @@ export const createModel = url => {
 
     const model = {
       progress$,
-      object$: Rx.Observable.merge(object$, mesh$),
+      object$: Rx.Observable.merge(
+        object$,
+        mesh$.map(mesh => {
+          fixNormalScale(mesh.material);
+          return mesh;
+        })
+      ),
     };
 
     models[url] = model;
@@ -69,4 +75,14 @@ export const createModel = url => {
 function splitUrl(url) {
   const [, path, file, ext] = url.match(/(.*\/)([^\/]*)(\.(?:[a-z])*)$/);
   return { path, file, ext };
+}
+
+function fixNormalScale(material) {
+  if (material.materials) {
+    material.materials.forEach(fixNormalScale);
+  } else {
+    if (material.normalScale) {
+      material.normalScale.set(1, 1);
+    }
+  }
 }
