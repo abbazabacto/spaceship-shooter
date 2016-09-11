@@ -19000,24 +19000,24 @@ vrControlsSubject$.onNext(hasVRControls ? vrControls : undefined);
 
 var deviceOrientationControls$ = _rx2.default.Observable.fromEvent(window, 'deviceorientation').filter(function (event) {
   return event.alpha;
-}).flatMap(function () {
+}).map(function (_) {
+  var deviceOrientationControls = new _three2.default.DeviceOrientationControls(_camera.camera, true);
+  deviceOrientationControls.connect();
+  deviceOrientationControls.update();
+
+  return deviceOrientationControls;
+}).takeUntil(_rx2.default.Observable.fromEvent(window, 'deviceorientation')).share();
+
+var controls$ = exports.controls$ = _rx2.default.Observable.merge(orbitControls$, deviceOrientationControls$).takeUntil(deviceOrientationControls$).flatMap(function () {
   return vrControlsSubject$.map(function (vrControls) {
     console.log('vrcontrols', vrControls);
     if (vrControls) {
       // vrControls.update();
       vrControls.resetPose();
       return vrControls;
-    }
-
-    var deviceOrientationControls = new _three2.default.DeviceOrientationControls(_camera.camera, true);
-    deviceOrientationControls.connect();
-    deviceOrientationControls.update();
-
-    return deviceOrientationControls;
+    };
   });
-}).takeUntil(_rx2.default.Observable.fromEvent(window, 'deviceorientation')).share();
-
-var controls$ = exports.controls$ = _rx2.default.Observable.merge(orbitControls$, deviceOrientationControls$).takeUntil(deviceOrientationControls$);
+});
 
 var controller1 = new _three2.default.ViveController(0);
 controller1.standingMatrix = vrControls.getStandingMatrix();
