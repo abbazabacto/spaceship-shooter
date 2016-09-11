@@ -20,6 +20,9 @@ renderer.shadowMap.enabled	= true
 const stereoEffect = new THREE.StereoEffect(renderer);
 const vrEffect = new THREE.VREffect(renderer);
 
+export const requestAnimationFrame = vrEffect.requestAnimationFrame;
+export const cancelAnimationFrame = vrEffect.cancelAnimationFrame;
+
 export const rendererStereoEffect$ = new Rx.BehaviorSubject(false);
 
 export const effectRenderer$ = rendererStereoEffect$
@@ -99,8 +102,8 @@ enableStereoRender$
     setRenderEffect(effectRenderer);
   });
 
-webRtcVideo$.take(1).subscribe(() => {
-  buttons[2].style.display = 'block';
+webRtcVideo$.take(1).subscribe((webRtcVideo) => {
+  buttons[2].style.display = webRtcVideo ? 'block' : 'none';
 });
 
 enableWebRtc$.subscribe(enableWebRtc => {
