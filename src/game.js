@@ -132,7 +132,7 @@ preload$
         shot.hit = true;
         removeShot(shot);
         removeEnemy(collisionResult[0].object);
-        addExplosion(collisionResult[0].object);
+        // addExplosion(collisionResult[0].object);
         addScore(1, shot.index);
       }
     });
