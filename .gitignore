@@ -5,7 +5,10 @@ node_modules
 cordova/**
 !cordova/config.xml
 res/models/asteroids
+<<<<<<< HEAD
 .png
 .jpg
 !dist/**/*.png
 !dist/**/*.jpg
+=======
+>>>>>>> fix: asteroids for later
