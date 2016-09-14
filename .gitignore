@@ -4,7 +4,6 @@ node_modules
 *.blend
 cordova/**
 !cordova/config.xml
-res/models/asteroids
 .png
 .jpg
 !dist/**/*.png
