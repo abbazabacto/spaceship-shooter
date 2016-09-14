@@ -2,7 +2,7 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { renderer, camera, scene } from '../tools';
+import { renderer, camera, scene, triggerdown$, triggerup$ } from '../tools';
 
 const shotGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
 const shotMaterial = new THREE.MeshBasicMaterial({
@@ -15,9 +15,11 @@ const interval$ = Rx.Observable.interval(200)
 
 const addShot$ = Rx.Observable
   .merge(
+    triggerdown$
+      .flatMap(() => interval$.takeUntil(triggerup$)),
     Rx.DOM.touchstart(renderer.domElement)
       .flatMap(() => interval$.takeUntil(Rx.DOM.touchend(renderer.domElement))),
-    // only on fullscreen webvr modus
+    // only on fullscreen webvr modus (GearVR)
     // Rx.DOM.mousedown(document)
     //   .flatMap(() => interval$.takeUntil(Rx.DOM.mouseup(document)).takeUntil(Rx.DOM.touchend(renderer.domElement))),
     Rx.Observable.fromEvent(document, 'keydown').filter(e => e.keyCode === 32)
