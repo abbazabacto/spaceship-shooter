@@ -57,7 +57,6 @@ scene.add( light );
 
 const game$ = createGameLoop({
   animationFrame$,
-  aspectRatio$,
   effectRenderer$,
   controls$,
   asteroids$,
@@ -73,7 +72,6 @@ preload$
   .flatMap(() => game$) 
   .subscribe(({ 
     animationFrame,
-    aspectRatio,
     effectRenderer,
     controls,
     asteroids,
@@ -149,12 +147,6 @@ preload$
     }
   });
   
-  //resize
-  camera.aspect = aspectRatio;
-  camera.updateProjectionMatrix();
-  
-  effectRenderer.setSize(window.innerWidth, window.innerHeight);
-  
   //update
   camera.updateProjectionMatrix();
   controls.update(delta);
@@ -166,3 +158,17 @@ preload$
   stats.update();
   rendererStats.update(renderer);
 });
+
+aspectRatio$
+  .withLatestFrom(
+    effectRenderer$,
+    (aspectRatio, effectRenderer) => ({ aspectRatio, effectRenderer })
+  )
+  .subscribe(({ aspectRatio, effectRenderer }) => {
+    //resize
+    camera.aspect = aspectRatio;
+    camera.updateProjectionMatrix();
+    
+    effectRenderer.setSize(window.innerWidth, window.innerHeight);
+  });
+  
