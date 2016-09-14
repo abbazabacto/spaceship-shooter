@@ -33,14 +33,20 @@ scene.add(camera);
 
 spaceshipObject$.subscribe(function(spaceshipObject){
   const object = spaceshipObject.clone();
+  const scale = 0.3;
+  object.scale.multiplyScalar(scale);
+
   const [frame, base] = object.children;
   addRenderer(() => {
     frame.rotation.x = camera.rotation.x;
     frame.rotation.y = camera.rotation.y;
     frame.rotation.z = camera.rotation.z;
+    object.position.x = camera.position.x;
+    object.position.y = camera.position.y + (-4 * scale);
+    object.position.z = camera.position.z + (-1 * scale);
   });
-  object.position.y = -4;
-  object.position.z = -1;
+  object.position.y = -4 * scale;
+  object.position.z = -1 * scale;
 
   scene.add(object);
 });
