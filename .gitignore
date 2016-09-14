@@ -5,4 +5,3 @@ node_modules
 dist
 cordova/**
 !cordova/config.xml
-res/models/asteroids
