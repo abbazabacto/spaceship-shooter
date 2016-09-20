@@ -125,6 +125,8 @@ export const rendererToggle$ = Rx.Observable.combineLatest(
 )
 .shareReplay(1);
 
+let zeroPointer;
+
 rendererToggle$
   .subscribe(({ effectRenderer, webRtcVideo }) => {
 
@@ -137,13 +139,12 @@ rendererToggle$
     
     videoTexture.minFilter = THREE.LinearFilter;
 
-  
     var geometry = new THREE.PlaneGeometry(40000, 40000, 32);
     // var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
     plane = new THREE.Mesh(geometry, material);
     plane.position.z = -19000;
 
-    const zeroPointer = new THREE.Object3D();
+    zeroPointer = new THREE.Object3D();
     zeroPointer.add(plane);
     scene.add(zeroPointer);
 
@@ -160,7 +161,7 @@ rendererToggle$
       effectRenderer._render.apply(this, arguments);
     }
   } else {
-    scene.remove(plane);
+    scene.remove(zeroPointer);
     // unpatch
     effectRenderer.render = effectRenderer._render;
     delete effectRenderer._render;
