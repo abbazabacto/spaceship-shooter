@@ -4,7 +4,7 @@ import 'rx-dom';
 
 import { scene, camera, renderer, renderers$, addRenderer, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
 import { aspectRatio$, getRad, getDeg } from './utils';
-import { asteroids$, removeShot, shots$, removeEnemy, enemies$, addExplosion, addScore, spaceshipObject$, earth$ } from './actors';
+import { asteroids$, shots$, enemies$, spaceshipObject$, earth$ } from './actors';
 
 import {createGameLoop} from './tools/gameLoop';
 
@@ -77,68 +77,27 @@ const game$ = createGameLoop({
 preload$
   .flatMap(() => game$) 
   .subscribe((actors) => {
-  const { 
-    animationFrame,
-    effectRenderer,
-    controls,
-    asteroids,
-    shots,
-    enemies,
-    stats,
-    rendererStats,
-    earth,
-    renderers,
-  } = actors;
+    const { 
+      animationFrame: { delta },
+      effectRenderer,
+      controls,
+      stats,
+      rendererStats,
+      renderers,
+    } = actors;
 
-  const { delta } = animationFrame; 
+    renderers.forEach(render => render({ scene, camera, delta, actors }));
 
-  renderers.forEach(render => render({ scene, camera, delta, actors }));
-
-  // shots
-  shots.forEach(shot => {
-    shot.translateZ(-2000 * delta);
+    //update
+    camera.updateProjectionMatrix();
+    controls.update(delta);
     
-    if (shot.scale.z < 20000) {
-      shot.scale.z += 4400 * delta;
-    }
+    //render
+    effectRenderer.render(scene, camera);
 
-    if (shot.position.z > 10000) {
-      removeShot(shot);
-      return;
-    }
-    
-    //collision detection
-    shot.geometry.vertices.forEach((vertex) => {
-      if(shot.hit){
-        return;
-      }
-      
-      const localVertex = vertex.clone();
-      const globalVertex = localVertex.applyMatrix4(shot.matrix);
-      const directionVector = globalVertex.sub(shot.position);
-
-      const ray = new THREE.Raycaster(shot.position.clone(), directionVector.clone().normalize());
-      const collisionResult = ray.intersectObjects(enemies);
-      if (collisionResult.length > 0 && collisionResult[0].distance < directionVector.length()) {
-        shot.hit = true;
-        removeShot(shot);
-        removeEnemy(collisionResult[0].object);
-        // addExplosion(collisionResult[0].object);
-        addScore(1, shot.index);
-      }
-    });
-  });
-
-  //update
-  camera.updateProjectionMatrix();
-  controls.update(delta);
-  
-  //render
-  effectRenderer.render(scene, camera);
-
-  //stats
-  stats.update();
-  rendererStats.update(renderer);
+    //stats
+    stats.update();
+    rendererStats.update(renderer);
 });
 
 aspectRatio$

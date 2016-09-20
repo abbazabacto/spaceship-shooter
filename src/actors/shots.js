@@ -2,7 +2,9 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { renderer, camera, scene, triggerdown$, triggerup$ } from '../tools';
+import { renderer, camera, scene, triggerdown$, triggerup$, addRenderer } from '../tools';
+import { removeEnemy, addExplosion } from '../actors/enemies';
+import { addScore } from '../actors/score';
 
 const shotGeometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
 const shotMaterial = new THREE.MeshBasicMaterial({
@@ -64,3 +66,39 @@ export const shots$ = Rx.Observable
 export function removeShot(shot){
   removeShot$.onNext(shot);
 };
+
+addRenderer(({ delta, actors: { shots, enemies } }) => {
+  shots.forEach(shot => {
+    shot.translateZ(-2000 * delta);
+    
+    if (shot.scale.z < 20000) {
+      shot.scale.z += 4400 * delta;
+    }
+
+    if (shot.position.z > 10000) {
+      removeShot(shot);
+      return;
+    }
+    
+    //collision detection
+    shot.geometry.vertices.forEach((vertex) => {
+      if(shot.hit){
+        return;
+      }
+      
+      const localVertex = vertex.clone();
+      const globalVertex = localVertex.applyMatrix4(shot.matrix);
+      const directionVector = globalVertex.sub(shot.position);
+
+      const ray = new THREE.Raycaster(shot.position.clone(), directionVector.clone().normalize());
+      const collisionResult = ray.intersectObjects(enemies);
+      if (collisionResult.length > 0 && collisionResult[0].distance < directionVector.length()) {
+        shot.hit = true;
+        removeShot(shot);
+        removeEnemy(collisionResult[0].object);
+        // addExplosion(collisionResult[0].object);
+        addScore(1, shot.index);
+      }
+    });
+  });
+});
