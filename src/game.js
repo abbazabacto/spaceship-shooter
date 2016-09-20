@@ -76,7 +76,8 @@ const game$ = createGameLoop({
 
 preload$
   .flatMap(() => game$) 
-  .subscribe(({ 
+  .subscribe((actors) => {
+  const { 
     animationFrame,
     effectRenderer,
     controls,
@@ -87,10 +88,11 @@ preload$
     rendererStats,
     earth,
     renderers,
-  }) => {
+  } = actors;
+
   const { delta } = animationFrame; 
 
-  renderers.forEach(render => render({ scene, camera, delta }));
+  renderers.forEach(render => render({ scene, camera, delta, actors }));
 
   //asteroids
   asteroids.forEach(function (asteroid, index) {
