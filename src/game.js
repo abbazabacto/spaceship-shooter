@@ -143,16 +143,7 @@ preload$
       }
     });
   });
-  
-  //enemeies
-  enemies.forEach(enemy => {
-    enemy.translateZ(250 * delta);
 
-    if (enemy.position.z > 10000) {
-      removeEnemy(enemy);
-    }
-  });
-  
   //update
   camera.updateProjectionMatrix();
   controls.update(delta);

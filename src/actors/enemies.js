@@ -94,3 +94,13 @@ export const addExplosion = (enemy) => {
       _renderMaterial = null;
     });
 };
+
+addRenderer(({ delta, actors: { enemies } }) => {
+  enemies.forEach(enemy => {
+    enemy.translateZ(250 * delta);
+
+    if (enemy.position.z > 10000) {
+      removeEnemy(enemy);
+    }
+  });
+});
