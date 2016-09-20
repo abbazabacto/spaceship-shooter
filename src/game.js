@@ -37,7 +37,7 @@ spaceshipObject$.subscribe(function(spaceshipObject){
   object.scale.multiplyScalar(scale);
 
   const [frame, base] = object.children;
-  addRenderer(() => {
+  addRenderer(({ camera }) => {
     frame.rotation.x = camera.rotation.x;
     frame.rotation.y = camera.rotation.y;
     frame.rotation.z = camera.rotation.z;
@@ -90,9 +90,7 @@ preload$
   }) => {
   const { delta } = animationFrame; 
 
-  renderers.forEach(render => render(scene, camera, delta));
-  // replace with -->
-  // renderers.forEach(render => render({ scene, camera, delta }));
+  renderers.forEach(render => render({ scene, camera, delta }));
 
   //asteroids
   asteroids.forEach(function (asteroid, index) {

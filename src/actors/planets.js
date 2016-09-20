@@ -102,7 +102,7 @@ createGui('containerEarth rotation x', 0, 0, 360)
     containerEarth.rotation.x = getRad(rotation);
   });
 
-addRenderer((scene, camara, delta) => {
+addRenderer(({ delta }) => {
   containerEarth.rotation.x += getRad(0.3) * delta;
   earthCloudsMesh.rotation.y -= getRad(0.15) * delta;
 });
