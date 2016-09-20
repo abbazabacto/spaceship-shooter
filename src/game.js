@@ -94,21 +94,6 @@ preload$
 
   renderers.forEach(render => render({ scene, camera, delta, actors }));
 
-  //asteroids
-  asteroids.forEach(function (asteroid, index) {
-    if (index % 3 === 0) {
-      asteroid.position.z += (10 * delta);
-    } else if (index % 3 === 1) {
-      asteroid.position.z += (20 * delta);
-    } else if (index % 3 === 2) {
-      asteroid.position.z += (50 * delta);
-    }
-
-    if (asteroid.position.z > 500) {
-      asteroid.position.z = -500;
-    }
-  });
-  
   // shots
   shots.forEach(shot => {
     shot.translateZ(-2000 * delta);

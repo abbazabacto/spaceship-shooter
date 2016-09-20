@@ -1,7 +1,7 @@
 import THREE from 'three';
 import Rx from 'rx';
 
-import { scene, createGui } from '../tools';
+import { scene, createGui, addRenderer } from '../tools';
 import { randomFromRange, range } from '../utils';
 
 const asteroidGeometries = [createAsteroidGeometry(1), createAsteroidGeometry(0.25), createAsteroidGeometry(0.5)];
@@ -43,3 +43,19 @@ export const asteroids$ = addAsteroids$
 function createAsteroidGeometry(size, fraction = 8) {
   return new THREE.SphereGeometry(size, fraction, fraction);
 }
+
+addRenderer(({ delta, actors: { asteroids } }) => {
+  asteroids.forEach((asteroid, index) => {
+    if (index % 3 === 0) {
+      asteroid.position.z += (10 * delta);
+    } else if (index % 3 === 1) {
+      asteroid.position.z += (20 * delta);
+    } else if (index % 3 === 2) {
+      asteroid.position.z += (50 * delta);
+    }
+
+    if (asteroid.position.z > 500) {
+      asteroid.position.z = -500;
+    }
+  });
+});
