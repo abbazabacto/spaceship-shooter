@@ -4,7 +4,7 @@ import 'rx-dom';
 
 import { scene, camera, renderer, renderers$, addRenderer, effectRenderer$, controls$, stats$, rendererStats$ } from './tools';
 import { aspectRatio$, getRad, getDeg } from './utils';
-import { asteroids$, shots$, enemies$, spaceshipObject$, earth$ } from './actors';
+import { asteroids$, shots$, enemies$, spaceshipObject$, earth$, levelMesh$, scoreMesh$ } from './actors';
 
 import { createGameLoop } from './tools/gameLoop';
 
@@ -71,13 +71,15 @@ const game$ = createGameLoop({
   rendererStats$,
   earth$,
   renderers$,
+  levelMesh$,
+  scoreMesh$,
 });
 
 preload$
   .flatMap(() => game$) 
   .subscribe((actors) => {
     const {
-      animationFrame: { delta },
+      animationFrame: { delta, timestamp },
       effectRenderer,
       controls,
       stats,
@@ -85,7 +87,7 @@ preload$
       renderers,
     } = actors;
 
-    renderers.forEach(render => render({ scene, camera, delta, actors }));
+    renderers.forEach(render => render({ scene, camera, delta, timestamp, actors }));
 
     //update
     camera.updateProjectionMatrix();

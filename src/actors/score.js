@@ -1,8 +1,7 @@
 import Rx from 'rx';
 
-// import { camera, animationFrame$, rendererStereoEffect$ } from '../tools';
-import { camera, rendererStereoEffect$ } from '../tools';
-import { createTextMesh, aspectRatio$, getRad } from '../utils';
+import { camera, rendererStereoEffect$, addRenderer, removeRenderer } from '../tools';
+import { createTextMesh, aspectRatio$, getRad, getNow } from '../utils';
 
 const addScore$ = new Rx.Subject();
 
@@ -25,7 +24,7 @@ scoreHolder.position.y = 80;
 scoreHolder.position.z = -100;
 camera.add(scoreHolder);
 
-const scoreMesh$ = score$
+export const scoreMesh$ = score$
   .map(function(currentScore){
     scoreHolder.remove(scoreHolder.children[0]);
     scoreHolder.add(createTextMesh(currentScore, {}, 'right'));
@@ -42,45 +41,37 @@ const levelHolder = new THREE.Object3D();
 camera.add(levelHolder);
 levelHolder.position.z = -100;
 
-const levelMesh$ = level$
+export const levelMesh$ = level$
   .map(function(currenLevel){
     levelHolder.position.y = 120;
     levelHolder.remove(levelHolder.children[0]);
     levelHolder.add(createTextMesh(`Level ${currenLevel}`, {}, 'center'));
     return levelHolder;
-  })
-  .timestamp();
+  });
 
-// Rx.Observable
-//   .combineLatest(
-//     animationFrame$, scoreMesh$, levelMesh$,
-//     function(animationFrame, scoreMesh, levelMesh){
-//       return { 
-//         animationFrame,
-//         scoreMesh, 
-//         levelMesh: levelMesh.value, 
-//         newLevelTimeElapsed: animationFrame.timestamp - levelMesh.timestamp 
-//       };
-//     }
-//   )
-//   .distinctUntilChanged(({ animationFrame }) => animationFrame.timestamp)
-//   .subscribe(function({ animationFrame, scoreMesh, levelMesh, newLevelTimeElapsed }){
-//     if(newLevelTimeElapsed < 5000){
-//       var position = Math.cos(Math.PI * (newLevelTimeElapsed / 5000));
-//       levelMesh.position.y -= position;
-//     }
-//   });
+level$.skip(1)
+  .subscribe(() => {
+    const timestampStart = getNow();
+
+    const animateLevelMesh = ({ delta, timestamp, actors: { levelMesh } }) => {
+      const elapsed = timestampStart - timestamp;
+      if (elapsed < -5000) {
+        removeRenderer(animateLevelMesh);
+      }
+      levelMesh.position.y -= Math.cos(Math.PI * (elapsed / 5000));
+    };
+
+    addRenderer(animateLevelMesh);
+  });
 
 const minScore = 10;
 const maxScore = 100;
 
-//export const addScore = AddScore.onNext;
 export function addScore(ships, shotIndex){
   const pointDeduction = shotIndex * minScore;
   addScore$.onNext(ships * (pointDeduction > maxScore - minScore ? minScore : maxScore - pointDeduction));
 }
 
-//export const removeScore = AddScore.onNext;
 export function removeScore(points){
   removeScore$.onNext(points);
 }
