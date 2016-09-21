@@ -1,6 +1,7 @@
 import Rx from 'rx';
 
-import { camera, animationFrame$, rendererStereoEffect$ } from '../tools';
+// import { camera, animationFrame$, rendererStereoEffect$ } from '../tools';
+import { camera, rendererStereoEffect$ } from '../tools';
 import { createTextMesh, aspectRatio$, getRad } from '../utils';
 
 const addScore$ = new Rx.Subject();
@@ -50,25 +51,25 @@ const levelMesh$ = level$
   })
   .timestamp();
 
-Rx.Observable
-  .combineLatest(
-    animationFrame$, scoreMesh$, levelMesh$,
-    function(animationFrame, scoreMesh, levelMesh){
-      return { 
-        animationFrame,
-        scoreMesh, 
-        levelMesh: levelMesh.value, 
-        newLevelTimeElapsed: animationFrame.timestamp - levelMesh.timestamp 
-      };
-    }
-  )
-  .distinctUntilChanged(({ animationFrame }) => animationFrame.timestamp)
-  .subscribe(function({ animationFrame, scoreMesh, levelMesh, newLevelTimeElapsed }){
-    if(newLevelTimeElapsed < 5000){
-      var position = Math.cos(Math.PI * (newLevelTimeElapsed / 5000));
-      levelMesh.position.y -= position;
-    }
-  });
+// Rx.Observable
+//   .combineLatest(
+//     animationFrame$, scoreMesh$, levelMesh$,
+//     function(animationFrame, scoreMesh, levelMesh){
+//       return { 
+//         animationFrame,
+//         scoreMesh, 
+//         levelMesh: levelMesh.value, 
+//         newLevelTimeElapsed: animationFrame.timestamp - levelMesh.timestamp 
+//       };
+//     }
+//   )
+//   .distinctUntilChanged(({ animationFrame }) => animationFrame.timestamp)
+//   .subscribe(function({ animationFrame, scoreMesh, levelMesh, newLevelTimeElapsed }){
+//     if(newLevelTimeElapsed < 5000){
+//       var position = Math.cos(Math.PI * (newLevelTimeElapsed / 5000));
+//       levelMesh.position.y -= position;
+//     }
+//   });
 
 const minScore = 10;
 const maxScore = 100;
