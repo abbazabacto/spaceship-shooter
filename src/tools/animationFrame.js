@@ -11,8 +11,8 @@ const startTimestamp = getNow();
 export const animationFrame$ = Rx.Observable.create(observer => {
   let animationFrame;
 
-  const run = () => {
-    animationFrame = requestAnimationFrame(run);
+  const nextFrame = () => {
+    animationFrame = requestAnimationFrame(nextFrame);
 
     const timestamp = getNow();
 
@@ -23,9 +23,7 @@ export const animationFrame$ = Rx.Observable.create(observer => {
     });
   }
 
-  run();
+  nextFrame();
 
-  return () => {
-    window.cancelAnimationFrame(animationFrame);
-  };
+  return () => window.cancelAnimationFrame(animationFrame);
 });
