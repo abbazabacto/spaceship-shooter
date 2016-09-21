@@ -1,13 +1,13 @@
 import Rx from 'rx';
 
-import { _animationFrame$ } from './animationFrame';
+import { animationFrame$ } from './animationFrame';
 
 export const createGameLoop = (actors) => {
   const actorsKeysList = Object.keys(actors);
   const actorsList = actorsKeysList.map(key => actors[key]);
 
   return Rx.Observable.combineLatest(
-    _animationFrame$,
+    animationFrame$,
     ...actorsList,
     createActorCombiner([
       'animationFrame',

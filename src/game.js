@@ -2,7 +2,7 @@ import THREE from 'three';
 import Rx from 'rx';
 import 'rx-dom';
 
-import { scene, camera, renderer, renderers$, addRenderer, effectRenderer$, controls$, animationFrame$, stats$, rendererStats$ } from './tools';
+import { scene, camera, renderer, renderers$, addRenderer, effectRenderer$, controls$, stats$, rendererStats$ } from './tools';
 import { aspectRatio$, getRad, getDeg } from './utils';
 import { asteroids$, shots$, enemies$, spaceshipObject$, earth$ } from './actors';
 
@@ -62,7 +62,6 @@ var light = new THREE.AmbientLight( 0x111111 );
 scene.add( light );
 
 const game$ = createGameLoop({
-  animationFrame$,
   effectRenderer$,
   controls$,
   asteroids$,
