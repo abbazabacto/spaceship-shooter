@@ -6,7 +6,7 @@ import { scene, camera, renderer, renderers$, addRenderer, effectRenderer$, cont
 import { aspectRatio$, getRad, getDeg } from './utils';
 import { asteroids$, shots$, enemies$, spaceshipObject$, earth$ } from './actors';
 
-import {createGameLoop} from './tools/gameLoop';
+import { createGameLoop } from './tools/gameLoop';
 
 stats$.subscribe(({ dom: domElement }) => {
   domElement.style.position = 'absolute';
@@ -58,8 +58,8 @@ const preload$ = Rx.Observable
     spaceshipObject => ({ spaceshipObject })
   );
 
-var light = new THREE.AmbientLight( 0x111111 );
-scene.add( light );
+const light = new THREE.AmbientLight( 0x111111 );
+scene.add(light);
 
 const game$ = createGameLoop({
   effectRenderer$,
