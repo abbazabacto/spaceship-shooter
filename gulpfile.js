@@ -50,12 +50,14 @@ gulp.task('serve', ['watch'], function(){
 });
 
 gulp.task('imagemin', function(){
-  gulp.src('./res/**/*.{jpg,png}')
+  return gulp.src([
+      './res/models/**/*.{jpg,png}'
+    ])
     .pipe(imagemin([
       imageminWebp({quality: 50})
     ]))
-    .pipe(gulp.dest('./dist/res/'));
-})
+    .pipe(gulp.dest('./dist/res/models'));
+});
 
 gulp.task('build-cordova', ['babelify', 'imagemin'], function(){
   gulp.src(['./index.html'])
