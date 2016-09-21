@@ -77,7 +77,7 @@ const game$ = createGameLoop({
 preload$
   .flatMap(() => game$) 
   .subscribe((actors) => {
-    const { 
+    const {
       animationFrame: { delta },
       effectRenderer,
       controls,
@@ -91,14 +91,14 @@ preload$
     //update
     camera.updateProjectionMatrix();
     controls.update(delta);
-    
+
     //render
     effectRenderer.render(scene, camera);
 
     //stats
     stats.update();
     rendererStats.update(renderer);
-});
+  });
 
 aspectRatio$
   .withLatestFrom(
@@ -109,7 +109,6 @@ aspectRatio$
     //resize
     camera.aspect = aspectRatio;
     camera.updateProjectionMatrix();
-    
+
     effectRenderer.setSize(window.innerWidth, window.innerHeight);
   });
-  
