@@ -1,6 +1,5 @@
 import THREE from 'three';
 import Rx from 'rx';
-import 'rx-dom';
 
 import { renderer, camera, scene, triggerdown$, triggerup$, addRenderer } from '../tools';
 import { removeEnemy, addExplosion } from '../actors/enemies';
@@ -15,21 +14,20 @@ const interval$ = Rx.Observable.interval(200)
   .startWith(-1)
   .map(index => index + 1);
 
+const touchstart$ = Rx.Observable.fromEvent(renderer.domElement, 'touchstart');
+const touchend$ = Rx.Observable.fromEvent(renderer.domElement, 'touchend');
+const spacebarKeydown$ = Rx.Observable.fromEvent(document, 'keydown').filter(e => e.keyCode === 32); 
+const spacebarKeyup$ = Rx.Observable.fromEvent(document, 'keyup').filter(e => e.keyCode === 32); 
+
 const addShot$ = Rx.Observable
   .merge(
-    triggerdown$
-      .flatMap(() => interval$.takeUntil(triggerup$)),
-    Rx.DOM.touchstart(renderer.domElement)
-      .flatMap(() => interval$.takeUntil(Rx.DOM.touchend(renderer.domElement))),
-    // only on fullscreen webvr modus (GearVR)
-    // Rx.DOM.mousedown(document)
-    //   .flatMap(() => interval$.takeUntil(Rx.DOM.mouseup(document)).takeUntil(Rx.DOM.touchend(renderer.domElement))),
-    Rx.Observable.fromEvent(document, 'keydown').filter(e => e.keyCode === 32)
-      .flatMap(x => interval$.takeUntil(Rx.Observable.fromEvent(document, 'keyup').filter(e => e.keyCode === 32)))
+    triggerdown$.flatMap(() => interval$.takeUntil(triggerup$)),
+    touchstart$.flatMap(() => interval$.takeUntil(touchend$)),
+    spacebarKeydown$.flatMap(() => interval$.takeUntil(spacebarKeyup$))
   )
   .throttle(200);
 
-const removeShot$ = new Rx.Subject()
+const removeShot$ = new Rx.Subject();
 
 let count = 0;
 
@@ -62,8 +60,7 @@ export const shots$ = Rx.Observable
   .scan((shotArray, operation) => operation(shotArray), [])
   .startWith([]);
 
-//export const removeShot = RemoveShot.onNext;
-export function removeShot(shot){
+const removeShot = (shot) => {
   removeShot$.onNext(shot);
 };
 
@@ -79,13 +76,13 @@ addRenderer(({ delta, actors: { shots, enemies } }) => {
       removeShot(shot);
       return;
     }
-    
+
     //collision detection
     shot.geometry.vertices.forEach((vertex) => {
-      if(shot.hit){
+      if (shot.hit){
         return;
       }
-      
+
       const localVertex = vertex.clone();
       const globalVertex = localVertex.applyMatrix4(shot.matrix);
       const directionVector = globalVertex.sub(shot.position);
