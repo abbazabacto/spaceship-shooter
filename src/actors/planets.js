@@ -1,13 +1,6 @@
 import THREE from 'three';
 import Rx from 'rx';
 
-import THREEx from '../../lib/planets/threex.planets';
-
-THREEx.Planets.baseURL = '/lib/planets/';
-if(window.location.pathname.indexOf('/spaceship-shooter') === 0) {
-  THREEx.Planets.baseURL = `/spaceship-shooter/${THREEx.Planets.baseURL}`;
-}
-
 import _, { createAtmosphereMaterial } from '../../lib/planets/threex.atmospherematerial';
 
 import { scene, addRenderer, rendererToggle$, createGui } from '../tools';
@@ -103,7 +96,7 @@ createGui('containerEarth rotation x', 0, 0, 360)
   });
 
 addRenderer(({ delta }) => {
-  containerEarth.rotation.x += getRad(0.3) * delta;
+  containerEarth.rotation.x += getRad(0.15) * delta;
   earthCloudsMesh.rotation.y -= getRad(0.15) * delta;
 });
 
