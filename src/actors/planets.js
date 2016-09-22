@@ -33,14 +33,14 @@ containerEarth.add(moonMesh);
 
 const earthGeometry = new THREE.SphereGeometry(3000, 64, 64);
 const earthMaterial	= new THREE.MeshPhongMaterial({
-  map	: loader.load('dist/res/models/planets/earth/earth-night.png'),
-  normalMap	: loader.load('dist/res/models/planets/earth/earth-normal.png'),
+  map: loader.load('dist/res/models/planets/earth/earth-night.png'),
+  normalMap: loader.load('dist/res/models/planets/earth/earth-normal.png'),
   normalScale: new THREE.Vector2(0.384084,0.384084),
-  specularMap : loader.load('dist/res/models/planets/earth/earth-spec.png'),
-  specular : new THREE.Color('grey'),
+  specularMap: loader.load('dist/res/models/planets/earth/earth-spec.png'),
+  specular: new THREE.Color('grey'),
   shininess: 30,
   emissive: new THREE.Color(1,1,0.8),
-  emissiveMap	: loader.load('dist/res/models/planets/earth/earth-emission.png'),
+  emissiveMap: loader.load('dist/res/models/planets/earth/earth-emission.png'),
   emissiveIntensity: 0.5,
 });
 
@@ -112,8 +112,8 @@ scene.add(sunLight);
 
 const starFieldGeometry = new THREE.SphereGeometry(19900, 32, 32);
 const starFieldMaterial	= new THREE.MeshBasicMaterial({
-  map	: loader.load('dist/res/models/planets/starfield/star-environment-darker3.png'),
-  side : THREE.BackSide
+  map: loader.load('dist/res/models/planets/starfield/star-environment-darker3.png'),
+  side: THREE.BackSide,
 });
 const starFieldMesh	= new THREE.Mesh(starFieldGeometry, starFieldMaterial);
 starFieldMesh.rotation.x = getRad(-149);
