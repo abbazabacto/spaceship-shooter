@@ -7,7 +7,4 @@ const aspect = getAspectRatio(renderer.domElement);
 const near = 0.01;
 const far = 20000;
 
-const camera = new THREE.PerspectiveCamera(perspective, aspect, near, far);
-camera.position.set(0, 0, 0);
-
-export { camera };
+export const camera = new THREE.PerspectiveCamera(perspective, aspect, near, far);
