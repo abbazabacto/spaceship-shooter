@@ -10,7 +10,7 @@ const shotMaterial = new THREE.MeshBasicMaterial({
   color: 0xff0000
 });
 
-const interval$ = Rx.Observable.interval(200)
+const interval$ = Rx.Observable.interval(500)
   .startWith(-1)
   .map(index => index + 1);
 
@@ -19,13 +19,19 @@ const touchend$ = Rx.Observable.fromEvent(renderer.domElement, 'touchend');
 const spacebarKeydown$ = Rx.Observable.fromEvent(document, 'keydown').filter(e => e.keyCode === 32); 
 const spacebarKeyup$ = Rx.Observable.fromEvent(document, 'keyup').filter(e => e.keyCode === 32); 
 
+const spacebarKeydownOnce$ = Rx.Observable.merge(
+  spacebarKeydown$,
+  spacebarKeyup$
+)
+.distinctUntilChanged(e => e.type)
+.filter(e => e.type === 'keydown');
+
 const addShot$ = Rx.Observable
   .merge(
-    triggerdown$.flatMap(() => interval$.takeUntil(triggerup$)),
-    touchstart$.flatMap(() => interval$.takeUntil(touchend$)),
-    spacebarKeydown$.flatMap(() => interval$.takeUntil(spacebarKeyup$))
-  )
-  .throttle(200);
+    triggerdown$.throttle(500).flatMap(() => interval$.takeUntil(triggerup$)),
+    touchstart$.throttle(500).flatMap(() => interval$.takeUntil(touchend$)),
+    spacebarKeydownOnce$.throttle(500).flatMap(() => interval$.takeUntil(spacebarKeyup$))
+  );
 
 const removeShot$ = new Rx.Subject();
 
