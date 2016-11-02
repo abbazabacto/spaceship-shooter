@@ -68,11 +68,14 @@ export const addExplosion = (enemy) => {
   let _renderMaterial;
   const { position, rotation } = enemy;
 
-  getVideoMaterialRenderer$('res/video/explosion/explosion_chroma.webm')
+  getVideoMaterialRenderer$('res/video/explosion/explosion.webm')
     .do((renderMaterial) => _renderMaterial = renderMaterial)
     .subscribe((renderMaterial) => {
       const geometry = new THREE.PlaneGeometry(200, 200, 200);
-      plane = new THREE.Mesh(geometry, renderMaterial());
+      const material = renderMaterial();
+      material.transparent = true;
+      material.blending = THREE.AdditiveBlending;
+      plane = new THREE.Mesh(geometry, material);
 
       plane.position.x = position.x;
       plane.position.y = position.y;
