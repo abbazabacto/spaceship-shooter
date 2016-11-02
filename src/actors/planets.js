@@ -112,7 +112,7 @@ scene.add(sunLight);
 
 const starFieldGeometry = new THREE.SphereGeometry(19900, 32, 32);
 const starFieldMaterial	= new THREE.MeshBasicMaterial({
-  map: loader.load('dist/res/models/planets/starfield/star-environment-darker3.png'),
+  map: loader.load('dist/res/models/planets/starfield/star-environment.png'),
   side: THREE.BackSide,
 });
 const starFieldMesh	= new THREE.Mesh(starFieldGeometry, starFieldMaterial);
