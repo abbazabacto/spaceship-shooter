@@ -6,10 +6,11 @@ import { getNow } from '../utils';
 import { requestAnimationFrame, cancelAnimationFrame } from './renderer';
 
 const clock = new THREE.Clock();
-const startTimestamp = getNow();
 
 export const animationFrame$ = Rx.Observable.create(observer => {
   let animationFrame;
+
+  const startTimestamp = getNow();
 
   const nextFrame = () => {
     animationFrame = requestAnimationFrame(nextFrame);
