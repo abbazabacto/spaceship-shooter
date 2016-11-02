@@ -100,7 +100,7 @@ export const addExplosion = (enemy) => {
 
 addRenderer(({ delta, actors: { enemies } }) => {
   enemies.forEach(enemy => {
-    enemy.translateZ(250 * delta);
+    enemy.translateZ(400 * delta);
 
     if (enemy.position.z > 10000) {
       removeEnemy(enemy);
